@@ -5,7 +5,7 @@ const page = () => {
   return (
     <div className="mx-auto w-full space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Silent Zones</h1>
+        <h1 className="text-2xl font-medium tracking-tight">Silent Zones</h1>
         <p className="text-muted-foreground">
           Manage geographical areas with restricted activity. You can view in
           list or map form and add new zones as needed.

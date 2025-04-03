@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
+import Link from "next/link";
 
 export function Header() {
   return (
@@ -19,7 +20,9 @@ export function Header() {
       </div>
       <div className="flex items-center justify-end h-16 px-4">
         <div className="flex items-center gap-4">
-          <Bell className="w-5 h-5" />
+          <Link href="/dashboard/notification">
+            <Bell className="w-5 h-5" />
+          </Link>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button className="flex items-center gap-2 w-48">

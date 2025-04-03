@@ -1,28 +1,37 @@
-"use client"
+"use client";
 
-import { Search } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { cn } from "@/lib/utils"
+import { Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
+import DashboardCharts from "./dashboard-charts";
+import TopPerformingLocation from "./top-performing-location";
 
 export function DashboardContent() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+        <h1 className="text-2xl font-medium tracking-tight">Dashboard</h1>
         <p className="text-muted-foreground">
-          Analyze and optimize X-Disturb performance with real-time metrics and insightful statistics
+          Analyze and optimize X-Disturb performance with real-time metrics and
+          insightful statistics
         </p>
       </div>
 
       <div className="relative">
         <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-        <Input placeholder="Search metrics by location, time, or event" className="pl-10" />
+        <Input
+          placeholder="Search metrics by location, time, or event"
+          className="pl-10"
+        />
       </div>
 
       <div className="flex flex-wrap gap-2">
-        <Button variant="secondary" className="bg-orange-100 hover:bg-orange-200">
+        <Button
+          variant="secondary"
+          className="bg-orange-100 hover:bg-orange-200"
+        >
           All
         </Button>
         <Button variant="outline">Time Frame: Last 7 days</Button>
@@ -33,33 +42,36 @@ export function DashboardContent() {
       <div>
         <h2 className="mb-4 text-xl font-semibold">Key Metrics</h2>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <MetricCard title="Total Entries" value="12,456" change="+10%" changeType="positive" />
-          <MetricCard title="Unique Users" value="3,210" change="-5%" changeType="negative" />
-          <MetricCard title="Average Dwell Time" value="25 min" change="+15%" changeType="positive" />
-          <MetricCard title="Entry Rate" value="75%" change="+8%" changeType="positive" />
+          <MetricCard
+            title="Total Entries"
+            value="12,456"
+            change="+10%"
+            changeType="positive"
+          />
+          <MetricCard
+            title="Unique Users"
+            value="3,210"
+            change="-5%"
+            changeType="negative"
+          />
+          <MetricCard
+            title="Average Dwell Time"
+            value="25 min"
+            change="+15%"
+            changeType="positive"
+          />
+          <MetricCard
+            title="Entry Rate"
+            value="75%"
+            change="+8%"
+            changeType="positive"
+          />
         </div>
       </div>
-
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Entries Over Time</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[200px] flex items-center justify-center text-xl font-semibold">+12% vs last week</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Entries by Location</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[200px] flex items-center justify-center text-xl font-semibold">By region</div>
-          </CardContent>
-        </Card>
-      </div>
+      <DashboardCharts />
+      <TopPerformingLocation />
     </div>
-  )
+  );
 }
 
 function MetricCard({
@@ -68,10 +80,10 @@ function MetricCard({
   change,
   changeType,
 }: {
-  title: string
-  value: string
-  change: string
-  changeType: "positive" | "negative" | "neutral"
+  title: string;
+  value: string;
+  change: string;
+  changeType: "positive" | "negative" | "neutral";
 }) {
   return (
     <Card>
@@ -84,13 +96,12 @@ function MetricCard({
           className={cn(
             "text-xs",
             changeType === "positive" && "text-green-500",
-            changeType === "negative" && "text-red-500",
+            changeType === "negative" && "text-red-500"
           )}
         >
           {change}
         </p>
       </CardContent>
     </Card>
-  )
+  );
 }
-
