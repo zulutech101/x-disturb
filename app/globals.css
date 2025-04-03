@@ -35,6 +35,8 @@
     --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 14 75% 55%;
     --sidebar-ring: 0 0% 100%;
+
+    --header-height: 64px;
   }
 
   .dark {
@@ -67,5 +69,6 @@
     --sidebar-accent-foreground: 0 0% 100%;
     /* --sidebar-border: 14 75% 55%; */
     --sidebar-ring: 0 0% 100%;
+    --header-height: 64px;
   }
 }
