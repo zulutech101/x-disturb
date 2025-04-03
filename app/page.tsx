@@ -1,11 +1,14 @@
-import { DashboardLayout } from "@/components/dashboard-layout"
-import { DashboardContent } from "@/components/dashboard-content"
+"use client"
+
+import LoginPage from "@/components/Login";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
-  return (
-    <DashboardLayout>
-      <DashboardContent />
-    </DashboardLayout>
-  )
-}
+  const router = useRouter();
 
+  const handleLoginSuccess = () => {
+    router.push("/dashboard");
+  };
+
+  return <LoginPage onSuccess={handleLoginSuccess} />;
+}
