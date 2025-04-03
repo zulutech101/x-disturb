@@ -3,8 +3,8 @@
 import type React from "react"
 
 // import { useState } from "react"
-import  Sidebar  from "@/components/sidebar"
-import { Header } from "@/components/header"
+import  Sidebar  from "@/components/shared/sidebar"
+import { Header } from "@/components/shared/header"
 import { SidebarProvider } from "@/components/ui/sidebar"
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {

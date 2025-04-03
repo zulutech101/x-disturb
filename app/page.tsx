@@ -1,6 +1,6 @@
 "use client"
 
-import LoginPage from "@/components/Login";
+import LoginPage from "@/components/auth-components/Login";
 import { useRouter } from "next/navigation";
 
 export default function Home() {
