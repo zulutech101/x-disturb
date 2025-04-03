@@ -1,16 +1,34 @@
-'use client';
+"use client";
 
 import { useState } from "react";
-import { Home, MapPin, Clock, Users, FileText, Receipt, HelpCircle } from "lucide-react";
+import Link from "next/link";
+import {
+  Home,
+  MapPin,
+  Clock,
+  Users,
+  FileText,
+  Receipt,
+  HelpCircle,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const sidebarLinks = [
-  { label: "Dashboard", icon: Home },
-  { label: "Silent Zones", icon: MapPin },
-  { label: "Real Time Activity", icon: Clock },
-  { label: "Users Management", icon: Users },
-  { label: "Transactions", icon: Receipt },
-  { label: "Reports", icon: FileText },
+// Define static route data
+const sidebarRoutes = [
+  { label: "Dashboard", icon: Home, path: "/dashboard" },
+  { label: "Silent Zones", icon: MapPin, path: "/dashboard/silent-zones" },
+  {
+    label: "Real Time Activity",
+    icon: Clock,
+    path: "/dashboard/real-time-activity",
+  },
+  {
+    label: "Users Management",
+    icon: Users,
+    path: "/dashboard/users-management",
+  },
+  { label: "Transactions", icon: Receipt, path: "/dashboard/transactions" },
+  { label: "Reports", icon: FileText, path: "/dashboard/reports" },
 ];
 
 export default function Sidebar() {
@@ -21,26 +39,30 @@ export default function Sidebar() {
       <div className="p-4">
         <div className="text-lg font-bold mb-8">X-Disturb</div>
         <nav className="space-y-2">
-          {sidebarLinks.map((item) => (
-            <button
+          {sidebarRoutes.map((item) => (
+            <Link
               key={item.label}
+              href={item.path}
               onClick={() => setActive(item.label)}
               className={cn(
                 "flex items-center gap-3 w-full px-4 py-2 rounded-md hover:bg-[#d84327] transition-all",
-                active === item.label && "bg-white text-[#F2542D] font-semibold"
+                active === item.label && "bg-white hover:bg-white text-[#F2542D] font-semibold"
               )}
             >
               <item.icon size={18} />
               <span>{item.label}</span>
-            </button>
+            </Link>
           ))}
         </nav>
       </div>
       <div className="p-4">
-        <button className="flex items-center gap-2 text-sm hover:underline">
+        <Link
+          href="/help-center"
+          className="flex items-center gap-2 text-sm hover:underline"
+        >
           <HelpCircle size={16} />
           Help Center
-        </button>
+        </Link>
       </div>
     </aside>
   );
