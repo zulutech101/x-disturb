@@ -52,7 +52,7 @@ export default function SilentZones() {
     <div className="border rounded-lg overflow-hidden">
       <Table>
         <TableHeader>
-          <TableRow>
+          <TableRow className="border-b border-b-gray-400">
             <TableHead>Name</TableHead>
             <TableHead>Type</TableHead>
             <TableHead>Radius (meters)</TableHead>
@@ -63,14 +63,23 @@ export default function SilentZones() {
         </TableHeader>
         <TableBody>
           {zones.map((zone) => (
-            <TableRow key={zone.name} className="py-5">
-              <TableCell className="font-medium">{zone.name}</TableCell>
+            <TableRow
+              key={zone.name}
+              className="py-5 border-b border-b-gray-400"
+            >
+              <TableCell className="font-medium text-gray-700">
+                {zone.name}
+              </TableCell>
               <TableCell className="text-gray-500">{zone.type}</TableCell>
-              <TableCell className="text-gray-500">{zone.radius.toLocaleString()}</TableCell>
-              <TableCell className="text-gray-500">{zone.centerCoordinates.toLocaleString()}</TableCell>
+              <TableCell className="text-gray-500">
+                {zone.radius.toLocaleString()}
+              </TableCell>
+              <TableCell className="text-gray-500">
+                {zone.centerCoordinates.toLocaleString()}
+              </TableCell>
               <TableCell>
                 <Badge
-                  className={`px-4 py-1 outline-none rounded-4xl w-full ${
+                  className={`px-4 py-1.5 outline-none rounded-4xl w-full ${
                     zone.status === "Active"
                       ? "bg-[#0AD95C]/30 text-green-800 hover:bg-[#a8ebc8]"
                       : "bg-[#FF8736]/30 text-orange-800 hover:bg-[#f8d0b0]"

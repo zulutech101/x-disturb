@@ -43,8 +43,8 @@ export default function AppSidebar() {
   const [active, setActive] = useState("Dashboard");
 
   return (
-    // <Sidebar className="bg-[#F2542D] text-white top-[--header-height] p-4 !h-[calc(100svh-var(--header-height))]">
-    <Sidebar className="bg-[#F2542D] text-white top-16 p-4 !h-[calc(100svh-var(--header-height))]">
+    // <Sidebar className="bg-[##E66641] text-white top-[--header-height] p-4 !h-[calc(100svh-var(--header-height))]">
+    <Sidebar className="bg-[#E66641] text-white top-16 p-4 !h-[calc(100svh-var(--header-height))]">
       <SidebarHeader></SidebarHeader>
       <SidebarContent>
         {sidebarRoutes.map((item) => (
