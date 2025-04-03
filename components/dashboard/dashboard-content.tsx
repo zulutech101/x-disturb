@@ -10,7 +10,7 @@ import TopPerformingLocation from "./top-performing-location";
 
 export function DashboardContent() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 scrollbar-hide">
       <div>
         <h1 className="text-2xl font-medium tracking-tight">Dashboard</h1>
         <p className="text-muted-foreground">
