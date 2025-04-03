@@ -1,6 +1,6 @@
 "use client";
 
-import { Bar, BarChart, Line, LineChart, XAxis } from "recharts";
+import { Area, Bar, BarChart, XAxis, AreaChart } from "recharts";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/chart";
 
 export default function DashboardCharts() {
-  // Data for the line chart
   const timeData = [
     { day: "Mon", entries: 65 },
     { day: "Tue", entries: 40 },
@@ -21,25 +20,36 @@ export default function DashboardCharts() {
     { day: "Sun", entries: 60 },
   ];
 
-//   // Data for the bar chart
-//   const locationData = [
-//     { region: "Addis Ababa", entries: 75 },
-//     { region: "Adama", entries: 80 },
-//     { region: "Bishoftu", entries: 65 },
-//     { region: "Bahir Dar", entries: 85 },
-//   ];
+  const locationData = {
+    addisAbaba: {
+      label: "Addis Ababa",
+      color: "#0066cc",
+    },
+    adama: {
+      label: "Adama",
+      color: "#00a651",
+    },
+    bishoftu: {
+      label: "Bishoftu",
+      color: "#e30613",
+    },
+    bahirDar: {
+      label: "Bahir Dar",
+      color: "#ffd700",
+    },
+  };
 
   return (
     <div className="grid gap-6 md:grid-cols-2">
       {/* Entries Over Time Card */}
-      <Card>
+      <Card className="">
         <CardHeader className="pb-2">
           <CardTitle className="text-base font-medium">
             Entries Over Time
           </CardTitle>
           <div className="text-2xl font-bold">+12% vs last week</div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="">
           <ChartContainer
             config={{
               entries: {
@@ -47,16 +57,40 @@ export default function DashboardCharts() {
                 color: "#ff6b4a",
               },
             }}
-            className="h-[200px]"
+            className="h-[200px] w-full"
           >
-            <LineChart
+            <AreaChart
+              accessibilityLayer
               data={timeData}
-              margin={{ top: 5, right: 10, left: 0, bottom: 0 }}
+              margin={{
+                top: 10,
+                left: 12,
+                right: 12,
+              }}
             >
-              <Line
-                type="natural"
+              <XAxis
+                dataKey="day"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+                tickFormatter={(value) => value.slice(0, 3)}
+              />
+              <ChartTooltip
+                cursor={false}
+                content={<ChartTooltipContent indicator="line" />}
+              />
+              <defs>
+                <linearGradient id="fillGraph" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#FF8736" stopOpacity={0.8} />
+                  <stop offset="95%" stopColor="#FF8736" stopOpacity={0.1} />
+                </linearGradient>
+              </defs>
+              <Area
                 dataKey="entries"
-                stroke="var(--color-entries)"
+                type="natural"
+                fill="url(#fillGraph)"
+                fillOpacity={0.4}
+                stroke="#FF8736"
                 strokeWidth={2}
                 dot={(props) => {
                   const { cx, cy } = props;
@@ -78,9 +112,7 @@ export default function DashboardCharts() {
                   strokeWidth: 2,
                 }}
               />
-              <XAxis dataKey="day" axisLine={false} tickLine={false} dy={10} />
-              <ChartTooltip content={<ChartTooltipContent />} cursor={false} />
-            </LineChart>
+            </AreaChart>
           </ChartContainer>
         </CardContent>
       </Card>
@@ -94,47 +126,27 @@ export default function DashboardCharts() {
           <div className="text-2xl font-bold">By region</div>
         </CardHeader>
         <CardContent>
-          <ChartContainer
-            config={{
-              addisAbaba: {
-                label: "Addis Ababa",
-                color: "#0066cc",
-              },
-              adama: {
-                label: "Adama",
-                color: "#00a651",
-              },
-              bishoftu: {
-                label: "Bishoftu",
-                color: "#e30613",
-              },
-              bahirDar: {
-                label: "Bahir Dar",
-                color: "#ffd700",
-              },
-            }}
-            className="h-[200px]"
-          >
+          <ChartContainer config={locationData} className="h-[200px] w-full">
             <BarChart
               data={[
                 {
                   region: "Addis Ababa",
-                  value: 75,
+                  value: 100,
                   fill: "var(--color-addisAbaba)",
                 },
                 {
                   region: "Adama",
-                  value: 80,
+                  value: 100,
                   fill: "var(--color-adama)",
                 },
                 {
                   region: "Bishoftu",
-                  value: 65,
+                  value: 100,
                   fill: "var(--color-bishoftu)",
                 },
                 {
                   region: "Bahir Dar",
-                  value: 85,
+                  value: 100,
                   fill: "var(--color-bahirDar)",
                 },
               ]}

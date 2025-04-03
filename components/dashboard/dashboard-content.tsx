@@ -19,8 +19,8 @@ export function DashboardContent() {
         </p>
       </div>
 
-      <div className="relative">
-        <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+      <div className="relative flex">
+        <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
         <Input
           placeholder="Search metrics by location, time, or event"
           className="pl-10"
@@ -28,15 +28,14 @@ export function DashboardContent() {
       </div>
 
       <div className="flex flex-wrap gap-2">
-        <Button
-          variant="secondary"
-          className="bg-orange-100 hover:bg-orange-200"
-        >
+        <Button variant="secondary" className="bg-[#FF8736]/40 w-32">
           All
         </Button>
-        <Button variant="outline">Time Frame: Last 7 days</Button>
-        <Button variant="outline">Location: Global</Button>
-        <Button variant="outline">Status: Active</Button>
+        <Button className="border-none bg-[#F0F0F0]">
+          Time Frame: Last 7 days
+        </Button>
+        <Button className="border-none bg-[#F0F0F0]">Location: Global</Button>
+        <Button className="border-none bg-[#F0F0F0]">Status: Active</Button>
       </div>
 
       <div>

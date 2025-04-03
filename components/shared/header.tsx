@@ -14,7 +14,7 @@ import Link from "next/link";
 
 export function Header() {
   return (
-    <header className="flex h-[--header-height] items-center justify-between border-b px-4">
+    <header className="flex h-[--header-height] items-center justify-between border-b border-[#F0F0F0] px-4">
       <div className="flex items-center">
         <SidebarTrigger className="mr-2" />
       </div>
