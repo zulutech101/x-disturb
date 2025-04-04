@@ -48,6 +48,7 @@ export default function LoginPage() {
 
       if (res) {
         session.setItem("isAuthenticated", true);
+        session.setItem("userId", res.user.uid);
       }
       console.log({ res });
       setFormData({

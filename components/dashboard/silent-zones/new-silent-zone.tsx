@@ -24,13 +24,15 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 
-// Define the schema for the center object
+import { db } from "@/app/firebase/config";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { session } from "@/lib/sessionStorage";
+
 const CenterSchema = z.object({
   latitude: z.number(),
   longitude: z.number(),
 });
 
-// Define the form schema with Zod, aligned with SilentZoneSchema
 const formSchema = z.object({
   address: z.string().min(2, {
     message: "Address must be at least 2 characters.",
@@ -45,33 +47,43 @@ const formSchema = z.object({
     message: "Zone name must be at least 2 characters.",
   }),
   radius: z.number().min(1).max(500),
-  type: z.enum(["chruch", "mosque", "library"]),
-  // createdAt and updatedAt are typically set by the backend, so we exclude them from the form
+  type: z.enum(["church", "mosque", "library"]),
 });
 
 export default function CreateSilentZone() {
-  // Initialize form with react-hook-form and zod validation
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       address: "",
-      adminID: "",
+      adminID: session?.getItem("userId") || "",
       center: {
-        latitude: 0,
-        longitude: 0,
+        latitude: 19.030387185062764,
+        longitude: 8.76246570363005,
       },
       description: "",
       isActive: true,
       name: "",
       radius: 100,
-      type: "chruch",
+      type: "church",
     },
   });
 
-  // Form submission handler
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-    // Here you would typically send the data to your backend
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      const docRef = await addDoc(collection(db, "silent_zones"), {
+        ...values,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+      console.log("Document written with ID:", docRef.id);
+      form.reset();
+    } catch (error) {
+      console.error("Error adding document to silent_zones:", error);
+      form.setError("root", {
+        type: "manual",
+        message: "Failed to create silent zone. Please try again.",
+      });
+    }
   }
 
   return (
@@ -135,25 +147,6 @@ export default function CreateSilentZone() {
             )}
           />
 
-          {/* Admin ID */}
-          <FormField
-            control={form.control}
-            name="adminID"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Admin ID</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Enter admin ID"
-                    {...field}
-                    className="md:w-1/2"
-                  />
-                </FormControl>
-                <FormMessage className="text-sm text-red-600" />
-              </FormItem>
-            )}
-          />
-
           {/* Type */}
           <FormField
             control={form.control}
@@ -167,7 +160,7 @@ export default function CreateSilentZone() {
                       <SelectValue placeholder="Select Location Type" />
                     </SelectTrigger>
                     <SelectContent className="bg-white">
-                      <SelectItem value="chruch">Chruch</SelectItem>
+                      <SelectItem value="church">church</SelectItem>
                       <SelectItem value="mosque">Mosque</SelectItem>
                       <SelectItem value="library">Library</SelectItem>
                     </SelectContent>
@@ -193,19 +186,6 @@ export default function CreateSilentZone() {
                 </FormControl>
                 <FormMessage className="text-sm text-red-600" />
               </FormItem>
-              // <FormItem>
-              //   <FormLabel>Is Active</FormLabel>
-              //   <FormControl>
-              //     <input
-              //       type="checkbox"
-              //       {...field}
-              //       checked={field.value}
-              //       onChange={(e) => field.onChange(e.target.checked)}
-              //       className="md:w-1/2"
-              //     />
-              //   </FormControl>
-              //   <FormMessage className="text-sm text-red-600" />
-              // </FormItem>
             )}
           />
 
@@ -288,7 +268,7 @@ function MapPlace() {
             id="default-search"
             className="block w-full px-4 py-3 shadow-md ps-10 text-sm text-gray-900 rounded-lg bg-gray-50 focus:outline-none"
             placeholder="Search for user or zone"
-            required
+            // required
           />
         </div>
       </div>

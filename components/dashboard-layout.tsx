@@ -2,23 +2,20 @@
 import { Header } from "@/components/shared/header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import AppSidebar from "./shared/sidebar";
-
-import { useAuthState } from "react-firebase-hooks/auth";
-import { auth } from "@/app/firebase/config";
-import { useRouter } from "next/navigation";
-import { session } from "@/lib/sessionStorage";
+import { useAuthChecker } from "@/hooks/useAuthChecker";
+import { LoaderCircle } from "lucide-react";
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const [user] = useAuthState(auth);
-  const router = useRouter();
+  // if not authenticated the useAuthChecker will redirect him to the login page
+  const { loading } = useAuthChecker();
 
-  // const userSession = sessionStorage.getItem("user");
-
-  if (!user && !session.getItem("isAuthenticated")) {
-    router.push("/");
+  if (loading) {
+    return (
+      <div className="h-full w-full flex items-center justify-center">
+        <LoaderCircle className="animate-spin text-[#E66641]" size={100} />
+      </div>
+    );
   }
-
-  console.log({ session });
 
   return (
     <div className="--header-height:calc(theme(spacing.14))">
