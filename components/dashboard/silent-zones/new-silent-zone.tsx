@@ -55,7 +55,7 @@ export default function CreateSilentZone() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       address: "",
-      adminID: session?.getItem("userId") || "",
+      adminID: session?.getItem("userId") || "admin_user",
       center: {
         latitude: 19.030387185062764,
         longitude: 8.76246570363005,
@@ -69,6 +69,7 @@ export default function CreateSilentZone() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    console.log({values});
     try {
       const docRef = await addDoc(collection(db, "silent_zones"), {
         ...values,
