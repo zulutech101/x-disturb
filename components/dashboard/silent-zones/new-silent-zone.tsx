@@ -15,17 +15,38 @@ import {
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Search } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 
-// Define the form schema with Zod
+// Define the schema for the center object
+const CenterSchema = z.object({
+  latitude: z.number(),
+  longitude: z.number(),
+});
+
+// Define the form schema with Zod, aligned with SilentZoneSchema
 const formSchema = z.object({
-  zoneName: z.string().min(2, {
+  address: z.string().min(2, {
+    message: "Address must be at least 2 characters.",
+  }),
+  adminID: z.string().min(1, {
+    message: "Admin ID is required.",
+  }),
+  center: CenterSchema,
+  description: z.string().optional(),
+  isActive: z.boolean(),
+  name: z.string().min(2, {
     message: "Zone name must be at least 2 characters.",
   }),
-  description: z.string().optional(),
-  location: z.string().min(2, {
-    message: "Location is required.",
-  }),
-  zoneRadius: z.number().min(1).max(500),
+  radius: z.number().min(1).max(500),
+  type: z.enum(["chruch", "mosque", "library"]),
+  // createdAt and updatedAt are typically set by the backend, so we exclude them from the form
 });
 
 export default function CreateSilentZone() {
@@ -33,10 +54,17 @@ export default function CreateSilentZone() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      zoneName: "",
+      address: "",
+      adminID: "",
+      center: {
+        latitude: 0,
+        longitude: 0,
+      },
       description: "",
-      location: "",
-      zoneRadius: 100,
+      isActive: true,
+      name: "",
+      radius: 100,
+      type: "chruch",
     },
   });
 
@@ -50,9 +78,10 @@ export default function CreateSilentZone() {
     <div className="w-full mx-auto p-4">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          {/* Zone Name */}
           <FormField
             control={form.control}
-            name="zoneName"
+            name="name"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Zone Name</FormLabel>
@@ -68,6 +97,7 @@ export default function CreateSilentZone() {
             )}
           />
 
+          {/* Description */}
           <FormField
             control={form.control}
             name="description"
@@ -86,15 +116,16 @@ export default function CreateSilentZone() {
             )}
           />
 
+          {/* Address */}
           <FormField
             control={form.control}
-            name="location"
+            name="address"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Location</FormLabel>
+                <FormLabel>Address</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="Search for a location"
+                    placeholder="Enter address"
                     {...field}
                     className="md:w-1/2"
                   />
@@ -104,16 +135,91 @@ export default function CreateSilentZone() {
             )}
           />
 
+          {/* Admin ID */}
+          <FormField
+            control={form.control}
+            name="adminID"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Admin ID</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Enter admin ID"
+                    {...field}
+                    className="md:w-1/2"
+                  />
+                </FormControl>
+                <FormMessage className="text-sm text-red-600" />
+              </FormItem>
+            )}
+          />
+
+          {/* Type */}
+          <FormField
+            control={form.control}
+            name="type"
+            render={({ field }) => (
+              <FormItem className="">
+                <FormLabel>Type</FormLabel>
+                <FormControl className="md:w-1/2">
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger className="md:w-1/2">
+                      <SelectValue placeholder="Select Location Type" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white">
+                      <SelectItem value="chruch">Chruch</SelectItem>
+                      <SelectItem value="mosque">Mosque</SelectItem>
+                      <SelectItem value="library">Library</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage className="text-sm text-red-600" />
+              </FormItem>
+            )}
+          />
+
+          {/* isActive */}
+          <FormField
+            control={form.control}
+            name="isActive"
+            render={({ field }) => (
+              <FormItem className="flex items-center space-x-2">
+                <FormLabel>Is Active</FormLabel>
+                <FormControl>
+                  <Switch
+                    checked={field.value} // Bind the checked state to the form value
+                    onCheckedChange={field.onChange} // Update the form value on change
+                  />
+                </FormControl>
+                <FormMessage className="text-sm text-red-600" />
+              </FormItem>
+              // <FormItem>
+              //   <FormLabel>Is Active</FormLabel>
+              //   <FormControl>
+              //     <input
+              //       type="checkbox"
+              //       {...field}
+              //       checked={field.value}
+              //       onChange={(e) => field.onChange(e.target.checked)}
+              //       className="md:w-1/2"
+              //     />
+              //   </FormControl>
+              //   <FormMessage className="text-sm text-red-600" />
+              // </FormItem>
+            )}
+          />
+
           {/* Map Component */}
-          <Card className="w-full col-span-2 h-[300px]  bg-gray-50 rounded-md overflow-hidden">
+          <Card className="w-full col-span-2 h-[300px] bg-gray-50 rounded-md overflow-hidden">
             <div className="relative w-full h-full">
               <MapPlace />
             </div>
           </Card>
 
+          {/* Zone Radius */}
           <FormField
             control={form.control}
-            name="zoneRadius"
+            name="radius"
             render={({ field }) => (
               <FormItem>
                 <FormControl>
@@ -127,6 +233,7 @@ export default function CreateSilentZone() {
                       step={1}
                       defaultValue={[field.value]}
                       onValueChange={(vals) => field.onChange(vals[0])}
+                      className="md:w-1/2"
                     />
                     <span className="text-sm">{field.value}</span>
                   </div>
@@ -136,6 +243,7 @@ export default function CreateSilentZone() {
             )}
           />
 
+          {/* Buttons */}
           <div className="flex justify-end space-x-2 pt-4">
             <Button
               onClick={() => form.reset()}
@@ -171,7 +279,7 @@ function MapPlace() {
           referrerPolicy="no-referrer-when-downgrade"
         ></iframe>
 
-        <div className="absolute top-3 left-10 right-10 bg-white rounded-2xl p-1 shadow-smw-full">
+        <div className="absolute top-3 left-10 right-10 bg-white rounded-2xl p-1 shadow-sm w-full">
           <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
             <Search className="text-gray-500 text-sm" />
           </div>
@@ -179,7 +287,7 @@ function MapPlace() {
             type="search"
             id="default-search"
             className="block w-full px-4 py-3 shadow-md ps-10 text-sm text-gray-900 rounded-lg bg-gray-50 focus:outline-none"
-            placeholder="Search  for user or zone"
+            placeholder="Search for user or zone"
             required
           />
         </div>
