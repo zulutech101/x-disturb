@@ -11,8 +11,8 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
   if (loading) {
     return (
-      <div className="h-full w-full flex items-center justify-center">
-        <LoaderCircle className="animate-spin text-[#E66641]" size={100} />
+      <div className="h-[100vh] w-full flex items-center justify-center">
+        <LoaderCircle className="animate-spin text-[#E66641]" size={70} />
       </div>
     );
   }

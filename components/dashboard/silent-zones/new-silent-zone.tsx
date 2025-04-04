@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { Search } from "lucide-react";
+// import { Search } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -27,10 +27,12 @@ import { Switch } from "@/components/ui/switch";
 import { db } from "@/app/firebase/config";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { session } from "@/lib/sessionStorage";
+import { useState } from "react";
+import HereMap from "./HereMap";
 
 const CenterSchema = z.object({
-  latitude: z.number(),
-  longitude: z.number(),
+  latitude: z.string(),
+  longitude: z.string(),
 });
 
 const formSchema = z.object({
@@ -51,14 +53,16 @@ const formSchema = z.object({
 });
 
 export default function CreateSilentZone() {
+  const [isAdding, setIsAdding] = useState(false);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       address: "",
       adminID: session?.getItem("userId") || "admin_user",
       center: {
-        latitude: 19.030387185062764,
-        longitude: 8.76246570363005,
+        latitude: "0",
+        longitude: "0",
       },
       description: "",
       isActive: true,
@@ -69,7 +73,7 @@ export default function CreateSilentZone() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log({values});
+    setIsAdding(true);
     try {
       const docRef = await addDoc(collection(db, "silent_zones"), {
         ...values,
@@ -85,6 +89,7 @@ export default function CreateSilentZone() {
         message: "Failed to create silent zone. Please try again.",
       });
     }
+    setIsAdding(false);
   }
 
   return (
@@ -193,7 +198,8 @@ export default function CreateSilentZone() {
           {/* Map Component */}
           <Card className="w-full col-span-2 h-[300px] bg-gray-50 rounded-md overflow-hidden">
             <div className="relative w-full h-full">
-              <MapPlace />
+              {/* <MapPlace /> */}
+              <HereMap />
             </div>
           </Card>
 
@@ -224,7 +230,6 @@ export default function CreateSilentZone() {
             )}
           />
 
-          {/* Buttons */}
           <div className="flex justify-end space-x-2 pt-4">
             <Button
               onClick={() => form.reset()}
@@ -235,8 +240,11 @@ export default function CreateSilentZone() {
               Cancel
             </Button>
             <Button
+              disabled={isAdding}
               type="submit"
-              className="bg-orange-500 text-white cursor-pointer"
+              className={`${
+                isAdding ? "bg-[#e78064]" : "bg-[#E66641]"
+              } text-white cursor-pointer`}
             >
               Create Zone
             </Button>
@@ -247,32 +255,32 @@ export default function CreateSilentZone() {
   );
 }
 
-function MapPlace() {
-  return (
-    <div className="w-full h-full flex items-center justify-center bg-gray-200 relative">
-      <div className="absolute inset-0">
-        <iframe
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1320.8605837054918!2d39.29040972240802!3d8.577775830638044!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x164b1f3df1d9c86d%3A0x2b52666a2d1752b1!2sHayica%20pharma%20pharmaceuticals%20wholesaler!5e0!3m2!1sen!2set!4v1743687410513!5m2!1sen!2set"
-          width="100%"
-          height="400"
-          allowFullScreen={true}
-          loading="lazy"
-          referrerPolicy="no-referrer-when-downgrade"
-        ></iframe>
+// function MapPlace() {
+//   return (
+//     <div className="w-full h-full flex items-center justify-center bg-gray-200 relative">
+//       <div className="absolute inset-0">
+//         <iframe
+//           src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1320.8605837054918!2d39.29040972240802!3d8.577775830638044!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x164b1f3df1d9c86d%3A0x2b52666a2d1752b1!2sHayica%20pharma%20pharmaceuticals%20wholesaler!5e0!3m2!1sen!2set!4v1743687410513!5m2!1sen!2set"
+//           width="100%"
+//           height="400"
+//           allowFullScreen={true}
+//           loading="lazy"
+//           referrerPolicy="no-referrer-when-downgrade"
+//         ></iframe>
 
-        <div className="absolute top-3 left-10 right-10 bg-white rounded-2xl p-1 shadow-sm w-full">
-          <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-            <Search className="text-gray-500 text-sm" />
-          </div>
-          <input
-            type="search"
-            id="default-search"
-            className="block w-full px-4 py-3 shadow-md ps-10 text-sm text-gray-900 rounded-lg bg-gray-50 focus:outline-none"
-            placeholder="Search for user or zone"
-            // required
-          />
-        </div>
-      </div>
-    </div>
-  );
-}
+//         <div className="absolute top-3 left-10 right-10 bg-white rounded-2xl p-1 shadow-sm w-full">
+//           <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+//             <Search className="text-gray-500 text-sm" />
+//           </div>
+//           <input
+//             type="search"
+//             id="default-search"
+//             className="block w-full px-4 py-3 shadow-md ps-10 text-sm text-gray-900 rounded-lg bg-gray-50 focus:outline-none"
+//             placeholder="Search for user or zone"
+//             // required
+//           />
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }

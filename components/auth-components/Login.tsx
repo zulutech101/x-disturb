@@ -51,10 +51,6 @@ export default function LoginPage() {
         session.setItem("userId", res.user.uid);
       }
       console.log({ res });
-      setFormData({
-        email: "",
-        password: "",
-      });
       router.push("/dashboard");
     } catch (err) {
       console.log(err);
