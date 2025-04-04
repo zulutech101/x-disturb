@@ -11,12 +11,21 @@ import {
 } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
 import Link from "next/link";
+import { signOut } from "firebase/auth";
+import { auth } from "@/app/firebase/config";
+import { session } from "@/lib/sessionStorage";
 
 export function Header() {
+  // logout
+  const handleLogout = () => {
+    signOut(auth);
+    session.clear();
+  };
+
   return (
     <header className="flex h-[--header-height] items-center justify-between border-b border-[#F0F0F0] px-4">
       <div className="flex items-center">
-        <SidebarTrigger className="mr-2" />
+        <SidebarTrigger className="mr-2 cursor-pointer" />
       </div>
       <div className="flex items-center justify-end h-16 px-4">
         <div className="flex items-center gap-4">
@@ -24,8 +33,8 @@ export function Header() {
             <Bell className="w-5 h-5" />
           </Link>
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button className="flex items-center gap-2 w-48">
+            <DropdownMenuTrigger asChild className="cursor-pointer">
+              <Button variant="ghost" className="flex items-center gap-2 w-48">
                 <div className="flex items-center gap-3">
                   <Avatar>
                     <AvatarFallback className="bg-orange-500 text-white">
@@ -42,13 +51,16 @@ export function Header() {
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="end"
-              className="w-56 bg-white dark:bg-gray-50 border-none shadow-md py-4"
+              className="z-50 w-56 h-52 bg-red-800 dark:bg-gray-50 border-none shadow-md py-4"
             >
               <DropdownMenuItem className="cursor-pointer">
                 <User className="w-4 h-4 mr-2" />
                 My profile
               </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer">
+              <DropdownMenuItem
+                onClick={() => handleLogout()}
+                className="cursor-pointer"
+              >
                 <LogOut className="w-4 h-4 mr-2" />
                 Log out
               </DropdownMenuItem>

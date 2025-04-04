@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,10 +8,21 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { EyeIcon, Loader2 } from "lucide-react";
 
+import { useSignInWithEmailAndPassword } from "react-firebase-hooks/auth";
+import { auth } from "@/app/firebase/config";
+import { session } from "@/lib/sessionStorage";
+
 export default function LoginPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [signInWithEmailAndPassword] = useSignInWithEmailAndPassword(auth);
+
+  useEffect(() => {
+    if (session.getItem("isAuthenticated")) {
+      router.push("/dashboard");
+    }
+  }, [router]);
 
   const [formData, setFormData] = useState({
     email: "",
@@ -19,7 +30,7 @@ export default function LoginPage() {
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
     }));
@@ -28,9 +39,29 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+
+    try {
+      const res = await signInWithEmailAndPassword(
+        formData.email,
+        formData.password
+      );
+
+      if (res) {
+        session.setItem("isAuthenticated", true);
+      }
+      console.log({ res });
+      setFormData({
+        email: "",
+        password: "",
+      });
+      router.push("/dashboard");
+    } catch (err) {
+      console.log(err);
+    }
+
     console.log("Login Data:", formData);
     // fake delay for loader
-    await new Promise(res => setTimeout(res, 500));
+    await new Promise((res) => setTimeout(res, 500));
     router.push("/dashboard");
   };
 
@@ -43,7 +74,10 @@ export default function LoginPage() {
           </h2>
           <form onSubmit={handleLogin} className="space-y-5">
             <div>
-              <Label htmlFor="email" className="text-black dark:text-white mb-2 block text-sm font-medium">
+              <Label
+                htmlFor="email"
+                className="text-black dark:text-white mb-2 block text-sm font-medium"
+              >
                 Username or email
               </Label>
               <Input
@@ -59,7 +93,10 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <Label htmlFor="password" className="text-black dark:text-white mb-2 block text-sm font-medium">
+              <Label
+                htmlFor="password"
+                className="text-black dark:text-white mb-2 block text-sm font-medium"
+              >
                 Password
               </Label>
               <div className="relative mt-1">
@@ -75,7 +112,7 @@ export default function LoginPage() {
                 />
                 <EyeIcon
                   className="absolute right-3 top-3 h-5 w-5 text-gray-500 cursor-pointer"
-                  onClick={() => setShowPassword(prev => !prev)}
+                  onClick={() => setShowPassword((prev) => !prev)}
                 />
               </div>
             </div>
