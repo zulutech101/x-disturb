@@ -1,0 +1,23 @@
+name: 🚀 Deploy to Vercel
+
+on:
+  push:
+    branches:
+      - vercel-deployment
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout repo
+        uses: actions/checkout@v3
+
+      - name: 📦 Install dependencies
+        run: npm install
+
+      - name: 🏗️ Build the project
+        run: npm run build
+
+      - name: 🚀 Deploy to Vercel
+        run: npx vercel --token ${{ secrets.VERCEL_TOKEN }} --prod --confirm --cwd . --org-id ${{ secrets.VERCEL_ORG_ID }} --project-id ${{ secrets.VERCEL_PROJECT_ID }}
