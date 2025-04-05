@@ -56,7 +56,7 @@ const formSchema = z.object({
 });
 
 export default function UpdateSilentZone() {
-  const [isAdding, setIsAdding] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
 
@@ -102,7 +102,7 @@ export default function UpdateSilentZone() {
   }, [zoneData, loading, form]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsAdding(true);
+    setIsEditing(true);
     try {
       if (id) {
         const docRef = doc(db, "silent_zones", id);
@@ -119,7 +119,7 @@ export default function UpdateSilentZone() {
         message: "Failed to update silent zone. Please try again.",
       });
     }
-    setIsAdding(false);
+    setIsEditing(false);
   }
 
   return (
@@ -270,13 +270,13 @@ export default function UpdateSilentZone() {
               Cancel
             </Button>
             <Button
-              disabled={isAdding}
+              disabled={isEditing}
               type="submit"
               className={`${
-                isAdding ? "bg-[#e78064]" : "bg-[#E66641]"
+                isEditing ? "bg-[#e78064]" : "bg-[#E66641]"
               } text-white cursor-pointer`}
             >
-              Create Zone
+              {isEditing ? "Updating Zone" : "Update Zone"}
             </Button>
           </div>
         </form>

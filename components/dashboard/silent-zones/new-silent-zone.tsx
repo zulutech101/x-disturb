@@ -245,7 +245,7 @@ export default function CreateSilentZone() {
                 isAdding ? "bg-[#e78064]" : "bg-[#E66641]"
               } text-white cursor-pointer`}
             >
-              Create Zone
+              {isAdding ? "Creating Zone" : "Create Zone"}
             </Button>
           </div>
         </form>
