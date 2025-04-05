@@ -15,6 +15,8 @@ import Link from "next/link";
 import { collection, query, onSnapshot } from "firebase/firestore";
 import { db } from "@/app/firebase/config";
 import { useEffect, useState } from "react";
+import { ConfirmRemovalDialog } from "./ConfirmRemove";
+import { Button } from "@/components/ui/button";
 
 interface SilentZone {
   name: string;
@@ -32,6 +34,7 @@ interface SilentZone {
 export default function SilentZones() {
   const [silentZones, setSilentZones] = useState<SilentZone[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     const silentZonesQuery = query(collection(db, "silent_zones"));
@@ -51,7 +54,6 @@ export default function SilentZones() {
       }
     );
 
-    // Cleanup subscription on unmount
     return () => unsubscribe();
   }, []);
 
@@ -120,6 +122,13 @@ export default function SilentZones() {
                   >
                     Edit
                   </Link>
+                  <Button
+                    onClick={() => setIsOpen(true)}
+                    variant="link"
+                    className="text-gray-700 hover:text-gray-900"
+                  >
+                    Remove
+                  </Button>
                 </TableCell>
               </TableRow>
             ))
@@ -134,6 +143,8 @@ export default function SilentZones() {
           )}
         </TableBody>
       </Table>
+
+      <ConfirmRemovalDialog isOpen={isOpen} onClose={() => setIsOpen(false)} />
     </div>
   );
 }
