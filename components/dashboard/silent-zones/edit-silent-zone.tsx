@@ -273,10 +273,10 @@ export default function UpdateSilentZone() {
               disabled={isEditing}
               type="submit"
               className={`${
-                isEditing ? "bg-[#e78064]" : "bg-[#E66641]"
+                isEditing ? "bg-[#43cf7b]" : "bg-[#04C34F]"
               } text-white cursor-pointer`}
             >
-              {isEditing ? "Updating Zone" : "Update Zone"}
+              {isEditing ? "Saving" : "Save"}
             </Button>
           </div>
         </form>

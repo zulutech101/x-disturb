@@ -12,7 +12,13 @@ import { Badge } from "@/components/ui/badge";
 
 import { LoaderCircle } from "lucide-react";
 import Link from "next/link";
-import { collection, query, onSnapshot } from "firebase/firestore";
+import {
+  collection,
+  query,
+  onSnapshot,
+  deleteDoc,
+  doc,
+} from "firebase/firestore";
 import { db } from "@/app/firebase/config";
 import { useEffect, useState } from "react";
 import { ConfirmRemovalDialog } from "./ConfirmRemove";
@@ -35,6 +41,7 @@ export default function SilentZones() {
   const [silentZones, setSilentZones] = useState<SilentZone[]>([]);
   const [loading, setLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
+  const [zoneToRemove, setZoneToRemove] = useState<string | null>(null);
 
   useEffect(() => {
     const silentZonesQuery = query(collection(db, "silent_zones"));
@@ -56,6 +63,16 @@ export default function SilentZones() {
 
     return () => unsubscribe();
   }, []);
+
+  const handleRemoveSilentZone = async (id: string) => {
+    try {
+      setIsOpen(false);
+      await deleteDoc(doc(db, "silent_zones", id));
+      console.log("Document removed with ID:", id);
+    } catch (err) {
+      console.error("Error removing silent zone:", err);
+    }
+  };
 
   console.log(silentZones);
 
@@ -123,7 +140,10 @@ export default function SilentZones() {
                     Edit
                   </Link>
                   <Button
-                    onClick={() => setIsOpen(true)}
+                    onClick={() => {
+                      setZoneToRemove(zone.id);
+                      setIsOpen(true);
+                    }}
                     variant="link"
                     className="text-gray-700 hover:text-gray-900"
                   >
@@ -143,8 +163,16 @@ export default function SilentZones() {
           )}
         </TableBody>
       </Table>
-
-      <ConfirmRemovalDialog isOpen={isOpen} onClose={() => setIsOpen(false)} />
+      {zoneToRemove && (
+        <ConfirmRemovalDialog
+          onConfirm={() => handleRemoveSilentZone(zoneToRemove)}
+          isOpen={isOpen}
+          onClose={() => {
+            setIsOpen(false);
+            setZoneToRemove(null); // Clear the selected zone on close
+          }}
+        />
+      )}
     </div>
   );
 }

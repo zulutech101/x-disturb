@@ -11,15 +11,17 @@ import {
 interface ConfirmRemovalDialogProps {
   isOpen: boolean;
   onClose: () => void;
+  onConfirm: () => void;
 }
 
 export function ConfirmRemovalDialog({
   isOpen,
   onClose,
+  onConfirm,
 }: ConfirmRemovalDialogProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px] bg-white dark:bg-black">
+      <DialogContent className="sm:max-w-[425px] bg-white">
         <DialogHeader>
           <DialogTitle>Confirm Removal</DialogTitle>
           <DialogDescription>
@@ -31,7 +33,7 @@ export function ConfirmRemovalDialog({
           <Button onClick={onClose} variant="outline">
             No
           </Button>
-          <Button className="bg-red-700 text-white">
+          <Button onClick={onConfirm} className="bg-red-700 text-white">
             Yes
           </Button>
         </div>
