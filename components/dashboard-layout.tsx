@@ -19,9 +19,9 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="--header-height:calc(theme(spacing.14))">
-      <SidebarProvider className="flex flex-col !max-h-[calc(100svh-var(--header-height))] overflow-y-scroll">
+      <SidebarProvider className="flex flex-col !max-h-[calc(100svh-var(--header-height))] ">
         <Header />
-        <div className="flex flex-1  overflow-y-scroll">
+        <div className="flex flex-1  overflow-y-scroll scrollbar-hide">
           <AppSidebar />
           <SidebarInset>
             <div className="flex flex-1 flex-col gap-4 p-4">{children}</div>
