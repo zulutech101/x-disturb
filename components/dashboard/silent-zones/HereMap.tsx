@@ -226,8 +226,8 @@ const HereMap = ({ onCoordinatesChange }: HereMapProps) => {
             className="flex-1"
             disabled={isLoading || isMapLoading}
           />
-          <Button type="button" onClick={handleSearch} disabled={isLoading || isMapLoading || !searchQuery}>
-            {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Search className="h-4 w-4 mr-2" />}
+          <Button type="button" onClick={handleSearch} disabled={isLoading || isMapLoading || !searchQuery} className="bg-[#E66641] text-white">
+            {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Search className="h-4 w-4 mr-2 " />}
             Search
           </Button>
         </div>

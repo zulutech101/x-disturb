@@ -276,7 +276,7 @@ export default function UpdateSilentZone() {
               disabled={isEditing}
               type="submit"
               className={`${
-                isEditing ? "bg-[#43cf7b]" : "bg-[#04C34F]"
+                isEditing ? "bg-[#bb958b]" : "bg-[#E66641]"
               } text-white cursor-pointer`}
             >
               {isEditing ? "Saving" : "Save"}

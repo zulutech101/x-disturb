@@ -77,102 +77,118 @@ export default function SilentZones() {
   console.log(silentZones);
 
   return (
-    <div className="border rounded-lg overflow-hidden">
-      <Table>
-        <TableHeader>
-          <TableRow className="border-b border-b-gray-400">
-            <TableHead>Name</TableHead>
-            <TableHead>Type</TableHead>
-            <TableHead>Radius (meters)</TableHead>
-            <TableHead>Center Coordinates</TableHead>
-            <TableHead className="w-[125px]">Status</TableHead>
-            <TableHead className="max-w-[250px]">Description</TableHead>
-            <TableHead className="w-[200px]">Action</TableHead>
+    <div className="border rounded-2xl shadow-md overflow-auto">
+    <Table className="min-w-full divide-y divide-gray-200">
+      <TableHeader className="bg-muted sticky top-0 z-10">
+        <TableRow>
+          <TableHead className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
+            Name
+          </TableHead>
+          <TableHead className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
+            Type
+          </TableHead>
+          <TableHead className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
+            Radius (m)
+          </TableHead>
+          <TableHead className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
+            Center Coordinates
+          </TableHead>
+          <TableHead className="px-6 py-3 text-sm font-semibold text-gray-700">
+            Status
+          </TableHead>
+          <TableHead className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
+            Description
+          </TableHead>
+          <TableHead className="px-6 py-3 text-center text-sm font-semibold text-gray-700">
+            Actions
+          </TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody className="bg-white divide-y divide-gray-100">
+        {loading ? (
+          <TableRow>
+            <TableCell colSpan={7}>
+              <div className="h-[50vh] flex items-center justify-center">
+                <LoaderCircle className="animate-spin text-primary" size={60} />
+              </div>
+            </TableCell>
           </TableRow>
-        </TableHeader>
-        <TableBody>
-          {loading ? (
-            <TableRow>
-              <TableCell colSpan={7}>
-                <div className="h-[50vh] w-full flex items-center justify-center">
-                  <LoaderCircle
-                    className="animate-spin text-[#E66641]"
-                    size={70}
-                  />
-                </div>
+        ) : silentZones && silentZones.length > 0 ? (
+          silentZones.map((zone) => (
+            <TableRow
+              key={zone.id}
+              className="hover:bg-muted/50 transition-colors"
+            >
+              <TableCell className="px-6 py-4 font-medium text-gray-900">
+                {zone.name || "N/A"}
+              </TableCell>
+              <TableCell className="px-6 py-4 text-gray-600 capitalize">
+                {zone.type}
+              </TableCell>
+              <TableCell className="px-6 py-4 text-gray-600">
+                {zone.radius.toLocaleString()}
+              </TableCell>
+              <TableCell className="px-6 py-4 text-gray-600">
+  {Number(zone.center.latitude).toFixed(6)},{" "}
+  {Number(zone.center.longitude).toFixed(6)}
+</TableCell>
+
+              <TableCell className="px-6 py-4">
+                <Badge
+                  className={`px-3 py-1 rounded-full text-xs font-medium ${
+                    zone.isActive
+                      ? "bg-green-100 text-green-800"
+                      : "bg-orange-100 text-orange-800"
+                  }`}
+                >
+                  {zone.isActive ? "Active" : "Inactive"}
+                </Badge>
+              </TableCell>
+              <TableCell className="px-6 py-4 text-gray-600 max-w-[250px] truncate">
+                {zone.description || "N/A"}
+              </TableCell>
+              <TableCell className="px-6 py-4 text-center space-x-2">
+                <Link
+                  href={`silent-zones/edit-zone?id=${zone.id}`}
+                  className="text-blue-600 hover:underline text-sm"
+                >
+                  Edit
+                </Link>
+                <Button
+                  onClick={() => {
+                    setZoneToRemove(zone.id);
+                    setIsOpen(true);
+                  }}
+                  variant="ghost"
+                  size="sm"
+                  className="text-red-600 hover:underline"
+                >
+                  Remove
+                </Button>
               </TableCell>
             </TableRow>
-          ) : silentZones && silentZones.length > 0 ? (
-            silentZones?.map((zone, index) => (
-              <TableRow key={index}>
-                <TableCell className="font-medium text-gray-700">
-                  {zone.name || "N/A"}
-                </TableCell>
-                <TableCell className="text-gray-500">
-                  {zone.type || "N/A"}
-                </TableCell>
-                <TableCell className="text-gray-500">
-                  {zone.radius.toLocaleString() || "N/A"}
-                </TableCell>
-                <TableCell className="text-gray-500">
-                  {zone.center.latitude.toLocaleString()},{" "}
-                  {zone.center.longitude.toLocaleString()}
-                </TableCell>
-                <TableCell>
-                  <Badge
-                    className={`px-4 py-1.5 outline-none rounded-4xl w-full ${
-                      zone.isActive
-                        ? "bg-[#0AD95C]/30 text-green-800 hover:bg-[#a8ebc8]"
-                        : "bg-[#FF8736]/30 text-orange-800 hover:bg-[#f8d0b0]"
-                    }`}
-                  >
-                    {zone.isActive ? "Active" : "Inactive"}
-                  </Badge>
-                </TableCell>
-                <TableCell className="text-gray-500 overflow-x-clip max-w-[250px]">
-                  {zone.description || "N/A"}
-                </TableCell>
-                <TableCell>
-                  <Link
-                    href={`silent-zones/edit-zone?id=${zone.id}`}
-                    className="text-gray-700 hover:text-gray-900"
-                  >
-                    Edit
-                  </Link>
-                  <Button
-                    onClick={() => {
-                      setZoneToRemove(zone.id);
-                      setIsOpen(true);
-                    }}
-                    variant="link"
-                    className="text-gray-700 hover:text-gray-900"
-                  >
-                    Remove
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={7} className="text-center text-gray-500">
-                <div className="h-[100vh] w-full flex items-center justify-center">
-                  No Silent Zones Added Yet!.
-                </div>
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
-      {zoneToRemove && (
-        <ConfirmRemovalDialog
-          onConfirm={() => handleRemoveSilentZone(zoneToRemove)}
-          isOpen={isOpen}
-          onClose={() => {
-            setIsOpen(false);
-            setZoneToRemove(null); // Clear the selected zone on close
-          }}
-        />
-      )}
-    </div>
+          ))
+        ) : (
+          <TableRow>
+            <TableCell colSpan={7} className="text-center text-gray-500 py-12">
+              No Silent Zones Added Yet!
+            </TableCell>
+          </TableRow>
+        )}
+      </TableBody>
+    </Table>
+  
+    {zoneToRemove && (
+      <ConfirmRemovalDialog
+        onConfirm={() => handleRemoveSilentZone(zoneToRemove)}
+        isOpen={isOpen}
+        onClose={() => {
+          setIsOpen(false);
+          setZoneToRemove(null);
+        }}
+      />
+    )}
+  </div>
+  
   );
 }
