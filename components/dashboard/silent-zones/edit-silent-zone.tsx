@@ -25,10 +25,13 @@ import {
 import { Switch } from "@/components/ui/switch";
 
 import { db } from "@/app/firebase/config";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { serverTimestamp, doc, updateDoc } from "firebase/firestore";
+import { useDocumentData } from "react-firebase-hooks/firestore";
+
 import { session } from "@/lib/sessionStorage";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import HereMap from "./HereMap";
+import { useSearchParams } from "next/navigation";
 
 const CenterSchema = z.object({
   latitude: z.string(),
@@ -52,8 +55,16 @@ const formSchema = z.object({
   type: z.enum(["church", "mosque", "library"]),
 });
 
-export default function CreateSilentZone() {
-  const [isAdding, setIsAdding] = useState(false);
+export default function UpdateSilentZone() {
+  const [isEditing, setIsEditing] = useState(false);
+  const searchParams = useSearchParams();
+  const id = searchParams.get("id");
+
+  const [zoneData, loading, error] = useDocumentData(
+    id ? doc(db, "silent_zones", id) : null
+  );
+
+  console.log({ zoneData, loading, error });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -72,23 +83,43 @@ export default function CreateSilentZone() {
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsAdding(true);
-    try {
-      const docRef = await addDoc(collection(db, "silent_zones"), {
-        ...values,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      });
-      console.log("Document written with ID:", docRef.id);
-    } catch (error) {
-      console.error("Error adding document to silent_zones:", error);
-      form.setError("root", {
-        type: "manual",
-        message: "Failed to create silent zone. Please try again.",
+  useEffect(() => {
+    if (zoneData && !loading) {
+      form.reset({
+        address: zoneData.address || "",
+        adminID: zoneData.adminID || session?.getItem("userId") || "admin_user",
+        center: {
+          latitude: String(zoneData.center?.latitude || "0"),
+          longitude: String(zoneData.center?.longitude || "0"),
+        },
+        description: zoneData.description || "",
+        isActive: zoneData.isActive || false,
+        name: zoneData.name || "",
+        radius: zoneData.radius || 100,
+        type: zoneData.type || "church",
       });
     }
-    setIsAdding(false);
+  }, [zoneData, loading, form]);
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsEditing(true);
+    try {
+      if (id) {
+        const docRef = doc(db, "silent_zones", id);
+        await updateDoc(docRef, {
+          ...values,
+          updatedAt: serverTimestamp(),
+        });
+        console.log("Document updated with ID:", id);
+      }
+    } catch (error) {
+      console.error("Error processing silent zone:", error);
+      form.setError("root", {
+        type: "manual",
+        message: "Failed to update silent zone. Please try again.",
+      });
+    }
+    setIsEditing(false);
   }
 
   return (
@@ -195,13 +226,15 @@ export default function CreateSilentZone() {
           />
 
           {/* Map Component */}
-
-          <HereMap  
+          
+              {/* <MapPlace /> */}
+              <HereMap  
             onCoordinatesChange={(coords) => {
               form.setValue("center.latitude", coords.lat);
               form.setValue("center.longitude", coords.lng);
             }}
           />
+         
 
           {/* Zone Radius */}
           <FormField
@@ -240,13 +273,13 @@ export default function CreateSilentZone() {
               Cancel
             </Button>
             <Button
-              disabled={isAdding}
+              disabled={isEditing}
               type="submit"
               className={`${
-                isAdding ? "bg-[#e78064]" : "bg-[#E66641]"
+                isEditing ? "bg-[#43cf7b]" : "bg-[#04C34F]"
               } text-white cursor-pointer`}
             >
-              {isAdding ? "Creating Zone" : "Create Zone"}
+              {isEditing ? "Saving" : "Save"}
             </Button>
           </div>
         </form>
