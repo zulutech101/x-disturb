@@ -24,7 +24,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         <div className="flex flex-1  overflow-y-scroll scrollbar-hide">
           <AppSidebar />
           <SidebarInset>
-            <div className="flex flex-1 flex-col gap-4 p-4">{children}</div>
+            <div className="flex flex-1 flex-col gap-4 p-8">{children}</div>
           </SidebarInset>
         </div>
       </SidebarProvider>
