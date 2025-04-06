@@ -1,176 +1,274 @@
-"use client";
+"use client"
 
-import { useEffect, useRef, useState } from "react";
-import H from "@here/maps-api-for-javascript";
+import type React from "react"
 
-const HereMap: React.FC = () => {
-  const mapRef = useRef<HTMLDivElement>(null);
-  const [coordinates, setCoordinates] = useState<{
-    lat: string | null;
-    lng: string | null;
-  }>({ lat: null, lng: null });
-  const [searchQuery, setSearchQuery] = useState<string>("");
-  const [map, setMap] = useState<H.Map | null>(null);
-  const [error, setError] = useState<string | null>(null);
+import { useEffect, useRef, useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Card, CardContent} from "@/components/ui/card"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Loader2, MapPin, Search } from "lucide-react"
+import { cn } from "@/lib/utils"
+/* eslint-disable */
+// Define types for HERE Maps API
+declare global {
+  interface Window {
+    H: any
+  }
+}
+type HereMapProps = {
+  onCoordinatesChange: (coords: { lat: string; lng: string }) => void;
+};
+const HereMap = ({ onCoordinatesChange }: HereMapProps) => {
+  const mapRef = useRef<HTMLDivElement>(null)
+  const [coordinates, setCoordinates] = useState<{ lat: string | null; lng: string | null }>({
+    lat: null,
+    lng: null,
+  })
 
-  const apikey: string = process.env.NEXT_PUBLIC_HERE_API_KEY || "";
-
-  useEffect(() => {
-    if (!mapRef.current) return;
-    if (!apikey) {
-      setError("API key is missing. Please check your environment variables.");
-      return;
+  const updateCoordinates = (coord: { lat: number; lng: number }) => {
+    const formattedCoords = {
+      lat: Number(coord.lat).toFixed(6),
+      lng: Number(coord.lng).toFixed(6),
     }
 
-    try {
-      // Initialize the platform
-      const platform = new H.service.Platform({
-        apikey: apikey,
-      });
+    setCoordinates(formattedCoords)
+    onCoordinatesChange(formattedCoords)
+  }
+  const [searchQuery, setSearchQuery] = useState<string>("")
+  const [map, setMap] = useState<any>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [isMapLoading, setIsMapLoading] = useState<boolean>(true)
+  const markersRef = useRef<any[]>([])
 
-      // Get default map layers
-      const defaultLayers = platform.createDefaultLayers();
+  const apikey: string = process.env.NEXT_PUBLIC_HERE_API_KEY || ""
 
-      // Check if layers are properly initialized
-      if (!defaultLayers.vector?.normal?.map) {
-        setError("Failed to load map layers");
-        return;
-      }
+  // Load HERE Maps scripts
+  useEffect(() => {
+    if (!apikey) {
+      setError("API key is missing. Please check your environment variables.")
+      setIsMapLoading(false)
+      return
+    }
 
-      // Initialize the map
-      const hereMap = new H.Map(
-        mapRef.current,
-        defaultLayers.vector.normal.map,
-        {
+    setIsMapLoading(true)
+
+    // Function to initialize map after scripts are loaded
+    const initMap = () => {
+      if (!mapRef.current || !window.H) return
+
+      try {
+        const H = window.H
+        const platform = new H.service.Platform({ apikey })
+        const defaultLayers = platform.createDefaultLayers()
+
+        const hereMap = new H.Map(mapRef.current, defaultLayers.vector.normal.map, {
           center: { lat: 9, lng: 38 },
           zoom: 13,
           pixelRatio: window.devicePixelRatio || 1,
-        }
-      );
+        })
 
-      // Enable map interactions
-      const mapEvents = new H.mapevents.MapEvents(hereMap);
-      const behavior = new H.mapevents.Behavior(mapEvents);
+        const mapEvents = new H.mapevents.MapEvents(hereMap)
+        new H.mapevents.Behavior(mapEvents)
 
-      // Add UI controls
-      const ui = H.ui.UI.createDefault(hereMap, defaultLayers);
+        H.ui.UI.createDefault(hereMap, defaultLayers)
 
-      // Add click event
-      hereMap.addEventListener("tap", (evt: H.mapevents.Event) => {
-        const coord = hereMap.screenToGeo(
-          (evt.currentPointer as H.util.Event).viewportX,
-          (evt.currentPointer as H.util.Event).viewportY
-        );
-        if (coord) {
-          setCoordinates({
-            lat: coord.lat.toFixed(6),
-            lng: coord.lng.toFixed(6),
-          });
-          const marker = new H.map.Marker({ lat: coord.lat, lng: coord.lng });
-          hereMap.addObject(marker);
-        }
-      });
+        hereMap.addEventListener("tap", (evt: any) => {
+          const coord = hereMap.screenToGeo(evt.currentPointer.viewportX, evt.currentPointer.viewportY)
 
-      setMap(hereMap);
+          if (coord) {
+            // Update coordinates for UI
+            updateCoordinates({
+              lat: coord.lat.toFixed(6),
+              lng: coord.lng.toFixed(6),
+            })
 
-      // Cleanup
-      return () => {
-        hereMap.dispose();
-      };
-    } catch (err) {
-      setError(
-        `Map initialization failed: ${
-          err instanceof Error ? err.message : String(err)
-        }`
-      );
-      console.error("Map error:", err);
+            // Clear previous markers
+            if (markersRef.current.length > 0) {
+              hereMap.removeObjects(markersRef.current)
+              markersRef.current = []
+            }
+
+            // Add marker using raw float values
+            const marker = new H.map.Marker(coord)
+            hereMap.addObject(marker)
+            markersRef.current.push(marker)
+          }
+        })
+
+        setMap(hereMap)
+        setIsMapLoading(false)
+      } catch (err) {
+        console.error("Map initialization error:", err)
+        setError(`Map initialization failed: ${err instanceof Error ? err.message : String(err)}`)
+        setIsMapLoading(false)
+      }
     }
-  }, [mapRef, apikey]);
 
-  const handleSearch = async (e: React.FormEvent<HTMLFormElement>) => {
+    // Load scripts in sequence with callbacks
+    const loadScript = (url: string, callback: () => void) => {
+      const script = document.createElement("script")
+      script.type = "text/javascript"
+      script.src = url
+      script.onload = callback
+      script.onerror = () => {
+        setError("Failed to load HERE Maps scripts. Please try again later.")
+        setIsMapLoading(false)
+      }
+      document.head.appendChild(script)
+    }
+
+    // Load CSS
+    const link = document.createElement("link")
+    link.rel = "stylesheet"
+    link.href = "https://js.api.here.com/v3/3.1/mapsjs-ui.css"
+    document.head.appendChild(link)
+
+    // Load scripts in sequence
+    loadScript("https://js.api.here.com/v3/3.1/mapsjs-core.js", () => {
+      loadScript("https://js.api.here.com/v3/3.1/mapsjs-service.js", () => {
+        loadScript("https://js.api.here.com/v3/3.1/mapsjs-ui.js", () => {
+          loadScript("https://js.api.here.com/v3/3.1/mapsjs-mapevents.js", () => {
+            // All scripts loaded, initialize map
+            setTimeout(() => {
+              if (window.H) {
+                initMap()
+              } else {
+                setError("HERE Maps API failed to initialize. Please refresh the page.")
+                setIsMapLoading(false)
+              }
+            }, 100) // Small delay to ensure scripts are fully initialized
+          })
+        })
+      })
+    })
+
+    return () => {
+      if (map) {
+        map.dispose()
+      }
+    }
+  }, [apikey])
+
+  // Use direct REST API for geocoding instead of the service API
+  const handleSearch = async  (e: React.MouseEvent<HTMLButtonElement>)  => {
     e.preventDefault();
-    if (!searchQuery || !map || !apikey) return;
+    e.stopPropagation(); // 🔥 prevent any bubbling weirdness
+    
+    if (!searchQuery || !map) return
 
-    const platform = new H.service.Platform({ apikey });
-    const service = platform.getSearchService();
+    setIsLoading(true)
+    setError(null)
 
     try {
-      const result = await new Promise<H.service.ServiceResult>(
-        (resolve, reject) => {
-          service.geocode({ q: searchQuery }, resolve, reject);
-        }
-      );
+      // Use the REST API directly
+      const encodedQuery = encodeURIComponent(searchQuery)
+      const url = `https://geocode.search.hereapi.com/v1/geocode?q=${encodedQuery}&apiKey=${apikey}`
 
-      if (result.items.length > 0) {
-        const position = result.items[0].position;
-        setCoordinates({
+      const response = await fetch(url)
+
+      if (!response.ok) {
+        throw new Error(`Geocoding request failed with status: ${response.status}`)
+      }
+
+      const data = await response.json()
+
+      if (data.items && data.items.length > 0) {
+        const position = data.items[0].position
+        updateCoordinates({
           lat: position.lat.toFixed(6),
           lng: position.lng.toFixed(6),
-        });
-        map.setCenter({ lat: position.lat, lng: position.lng });
-        map.setZoom(14);
-        const marker = new H.map.Marker(position);
-        map.addObject(marker);
+        })
+
+        map.setCenter({ lat: position.lat, lng: position.lng })
+        map.setZoom(14)
+
+        // Clear previous markers
+        if (markersRef.current.length > 0) {
+          map.removeObjects(markersRef.current)
+          markersRef.current = []
+        }
+
+        // Add new marker
+        const marker = new window.H.map.Marker(position)
+        map.addObject(marker)
+        markersRef.current.push(marker)
+      } else {
+        setError("No results found for your search query.")
       }
     } catch (error) {
-      console.error("Search error:", error);
-      setError("Search failed. Please try again.");
+      console.error("Search error:", error)
+      setError(`Search failed: ${error instanceof Error ? error.message : String(error)}`)
+    } finally {
+      setIsLoading(false)
     }
-  };
+  }
 
   return (
-    <div style={{ width: "100%", maxWidth: "800px", margin: "0 auto" }}>
-      <form onSubmit={handleSearch} style={{ marginBottom: "1rem" }}>
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setSearchQuery(e.target.value)
-          }
-          placeholder="Search location..."
-          style={{
-            padding: "0.5rem",
-            width: "70%",
-            marginRight: "0.5rem",
-          }}
-        />
-        <button
-          type="submit"
-          style={{
-            padding: "0.5rem 1rem",
-            backgroundColor: "#0078d4",
-            color: "white",
-            border: "none",
-            cursor: "pointer",
-          }}
-        >
-          Search
-        </button>
-      </form>
-
-      <div
-        ref={mapRef}
-        style={{
-          width: "100%",
-          height: "400px",
-          background: "#e0e0e0",
+    <Card className="w-full  mx-auto shadow-lg">
+      {/* <CardHeader>
+        <CardTitle className="text-center">HERE Maps Explorer</CardTitle>
+      </CardHeader> */}
+      <CardContent>
+        <div 
+         onSubmit={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          handleSearch(e as any); // only if you want to reuse the logic, or call handleSearch directly on button click
         }}
-      />
-
-      {coordinates.lat && coordinates.lng && (
-        <div style={{ marginTop: "1rem", textAlign: "center" }}>
-          <p>Latitude: {coordinates.lat}</p>
-          <p>Longitude: {coordinates.lng}</p>
+        className="flex gap-2 mb-4">
+          <Input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search for a location..."
+            className="flex-1"
+            disabled={isLoading || isMapLoading}
+          />
+          <Button type="button" onClick={handleSearch} disabled={isLoading || isMapLoading || !searchQuery}>
+            {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Search className="h-4 w-4 mr-2" />}
+            Search
+          </Button>
         </div>
-      )}
 
-      {error && (
-        <div style={{ color: "red", marginTop: "1rem", textAlign: "center" }}>
-          {error}
+        <div
+          className={cn(
+            "relative w-full h-[400px] bg-slate-100 rounded-md overflow-hidden",
+            isMapLoading && "flex items-center justify-center",
+          )}
+        >
+          {isMapLoading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-slate-100 bg-opacity-80 z-10">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <span className="ml-2">Loading map...</span>
+            </div>
+          )}
+          <div ref={mapRef} className="w-full h-full" />
         </div>
-      )}
-    </div>
-  );
-};
 
-export default HereMap;
+        {error && (
+          <Alert variant="destructive" className="mt-4">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
+        {coordinates.lat && coordinates.lng && (
+          <div className="mt-4 p-3 bg-slate-50 rounded-md flex items-center justify-center gap-4">
+            <div className="flex items-center">
+              <MapPin className="h-4 w-4 mr-1 text-primary" />
+              <span className="text-sm font-medium">Lat: {coordinates.lat}</span>
+            </div>
+            <div className="flex items-center">
+              <MapPin className="h-4 w-4 mr-1 text-primary" />
+              <span className="text-sm font-medium">Lng: {coordinates.lng}</span>
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  )
+}
+
+export default HereMap
+

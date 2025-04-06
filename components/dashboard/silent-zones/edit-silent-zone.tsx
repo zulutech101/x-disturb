@@ -13,7 +13,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
+// import { Card } from "@/components/ui/card";
 // import { Search } from "lucide-react";
 import {
   Select,
@@ -226,12 +226,15 @@ export default function UpdateSilentZone() {
           />
 
           {/* Map Component */}
-          <Card className="w-full col-span-2 h-[300px] bg-gray-50 rounded-md overflow-hidden">
-            <div className="relative w-full h-full">
+          
               {/* <MapPlace /> */}
-              <HereMap />
-            </div>
-          </Card>
+              <HereMap  
+            onCoordinatesChange={(coords) => {
+              form.setValue("center.latitude", coords.lat);
+              form.setValue("center.longitude", coords.lng);
+            }}
+          />
+         
 
           {/* Zone Radius */}
           <FormField
