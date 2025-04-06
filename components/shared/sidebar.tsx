@@ -16,12 +16,10 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
-  SidebarMenu,
-  SidebarMenuItem,
+  useSidebar,
 } from "../ui/sidebar";
 import { cn } from "@/lib/utils";
 
-// Define static route data
 const sidebarRoutes = [
   { label: "Dashboard", icon: Home, path: "/dashboard" },
   { label: "Silent Zones", icon: MapPin, path: "/dashboard/silent-zones" },
@@ -41,71 +39,50 @@ const sidebarRoutes = [
 
 export default function AppSidebar() {
   const [active, setActive] = useState("Dashboard");
+  const { state } = useSidebar();
 
   return (
-    // <Sidebar className="bg-[##E66641] text-white top-[--header-height] p-4 !h-[calc(100svh-var(--header-height))]">
-    <Sidebar className="bg-[#E66641] text-white top-16 p-4 !h-[calc(100svh-var(--header-height))]">
-      <SidebarHeader></SidebarHeader>
+    <Sidebar
+      collapsible="icon"
+      className="bg-[#E66641] text-white top-16 p-4 !h-[calc(100svh-var(--header-height))]"
+    >
+      <SidebarHeader />
       <SidebarContent>
-        {sidebarRoutes.map((item) => (
-          <SidebarMenu key={item.label}>
-            <SidebarMenuItem>
+        <nav className="flex flex-col gap-1">
+          {sidebarRoutes.map((item) => {
+            const isActive = active === item.label;
+            return (
               <Link
-                key={item.label}
-                href={item.path}
-                onClick={() => setActive(item.label)}
-                className={cn(
-                  "flex items-center gap-3 w-full px-4 py-2 rounded-md hover:bg-[#d84327] transition-all",
-                  active === item.label &&
-                    "bg-white hover:bg-white text-[#F2542D] font-semibold"
-                )}
-              >
-                <item.icon size={18} />
-                <span>{item.label}</span>
-              </Link>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        ))}
+              key={item.label}
+              href={item.path}
+              onClick={() => setActive(item.label)}
+              className={cn(
+                "flex items-center w-full gap-3 px-4 py-2 rounded-md transition-all hover:bg-[#d84327]",
+                isActive && "bg-white text-[#F2542D] font-semibold hover:bg-white",
+                state === "collapsed" && "justify-center px-2"
+              )}
+            >
+              <item.icon size={18} />
+              <span className={cn(state === "collapsed" ? "hidden" : "block")}>
+                {item.label}
+              </span>
+            </Link>
+            );
+          })}
+        </nav>
       </SidebarContent>
       <SidebarFooter>
         <Link
           href="/help-center"
-          className="flex items-center gap-2 text-sm hover:underline"
+          className={cn(
+            "flex items-center gap-2 text-sm hover:underline",
+            state === "collapsed" && "justify-center"
+          )}
         >
           <HelpCircle size={16} />
-          Help Center
+          {state !== "collapsed" && <span>Help Center</span>}
         </Link>
       </SidebarFooter>
     </Sidebar>
-    // <aside className="h-screen w-64 bg-[#F2542D] text-white flex flex-col justify-between">
-    //   <div className="p-4">
-    //     <div className="text-lg font-bold mb-8">X-Disturb</div>
-    //     <nav className="space-y-2">
-    // {sidebarRoutes.map((item) => (
-    //   <Link
-    //     key={item.label}
-    //     href={item.path}
-    //     onClick={() => setActive(item.label)}
-    //     className={cn(
-    //       "flex items-center gap-3 w-full px-4 py-2 rounded-md hover:bg-[#d84327] transition-all",
-    //       active === item.label && "bg-white hover:bg-white text-[#F2542D] font-semibold"
-    //     )}
-    //   >
-    //     <item.icon size={18} />
-    //     <span>{item.label}</span>
-    //   </Link>
-    // ))}
-    //     </nav>
-    //   </div>
-    //   <div className="p-4">
-    //     <Link
-    //       href="/help-center"
-    //       className="flex items-center gap-2 text-sm hover:underline"
-    //     >
-    //       <HelpCircle size={16} />
-    //       Help Center
-    //     </Link>
-    //   </div>
-    // </aside>
   );
 }
