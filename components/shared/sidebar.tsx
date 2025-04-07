@@ -10,6 +10,8 @@ import {
   FileText,
   Receipt,
   HelpCircle,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import {
   Sidebar,
@@ -39,39 +41,62 @@ const sidebarRoutes = [
 
 export default function AppSidebar() {
   const [active, setActive] = useState("Dashboard");
-  const { state } = useSidebar();
+  const { state, toggleSidebar } = useSidebar();
+  const isCollapsed = state === "collapsed";
 
   return (
     <Sidebar
       collapsible="icon"
-      className="bg-[#E66641] text-white top-16 p-4 !h-[calc(100svh-var(--header-height))]"
+      className="h-screen p-4 bg-[#E66641] text-white"
     >
-      <SidebarHeader />
+      {/* Sidebar Header */}
+      <SidebarHeader className="relative mb-4 px-2">
+        {!isCollapsed && (
+          <h1 className="text-lg font-bold tracking-wide text-white">
+            x-disturb
+          </h1>
+        )}
+
+        {/* Toggle Button */}
+        <button
+          onClick={toggleSidebar}
+          className="absolute -right-7 top-2 z-10 flex h-6 w-6 items-center justify-center rounded-full border border-[#E66641] bg-white text-[#E66641] shadow-md transition-all hover:scale-110"
+        >
+          {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+        </button>
+      </SidebarHeader>
+
+      {/* Nav items */}
       <SidebarContent>
         <nav className="flex flex-col gap-1">
           {sidebarRoutes.map((item) => {
             const isActive = active === item.label;
             return (
               <Link
-              key={item.label}
-              href={item.path}
-              onClick={() => setActive(item.label)}
-              className={cn(
-                "flex items-center w-full gap-3 px-4 py-2 rounded-md transition-all hover:bg-[#d84327]",
-                isActive && "bg-white text-[#F2542D] font-semibold hover:bg-white",
-                state === "collapsed" && "justify-center px-2"
-              )}
-            >
-              <item.icon size={18} />
-              <span className={cn(state === "collapsed" ? "hidden" : "block")}>
-                {item.label}
-              </span>
-            </Link>
+                key={item.label}
+                href={item.path}
+                onClick={() => setActive(item.label)}
+                className={cn(
+                  "flex items-center w-full gap-3 px-4 py-2 rounded-md transition-all hover:bg-[#d84327]",
+                  isActive &&
+                    "bg-white text-[#F2542D] font-semibold hover:bg-white",
+                  state === "collapsed" && "justify-center px-2"
+                )}
+              >
+                <item.icon size={18} />
+                <span
+                  className={cn(state === "collapsed" ? "hidden" : "block")}
+                >
+                  {item.label}
+                </span>
+              </Link>
             );
           })}
         </nav>
       </SidebarContent>
-      <SidebarFooter>
+
+      {/* Footer */}
+      <SidebarFooter className="mt-auto pt-4">
         <Link
           href="/help-center"
           className={cn(

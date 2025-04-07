@@ -10,15 +10,15 @@ const UserDetailPage = () => {
   };
 
   return (
-    <div className="w-full mx-auto bg-white dark:bg-gray-900 text-gray-950 dark:text-white shadow-lg rounded-lg p-6">
+    <div className="w-full mx-auto bg-white dark:bg-gray-900 text-gray-950 dark:text-white  rounded-lg p-6">
       <h1 className="text-3xl font-bold mb-6">Manage User</h1>
 
       <div className="flex items-center mb-6">
-        <img
+        {/* <img
           src="https://via.placeholder.com/150"
           alt="User"
           className="w-32 h-32 rounded-full mr-6"
-        />
+        /> */}
         <div>
           <h2 className="text-xl font-medium">Mariana Asher</h2>
           <p className="text-sm text-gray-500">Entered Zone: Downtown</p>
@@ -28,7 +28,7 @@ const UserDetailPage = () => {
       <div>
         <h3 className="text-xl font-medium mb-4">Account Status</h3>
         <div>
-          <div className="flex items-center mb-3">
+          <div className="flex items-center mb-3 px-3 py-2 border border-gray-200 rounded-lg cursor-pointer">
             <input
               type="radio"
               id="active"
@@ -41,7 +41,7 @@ const UserDetailPage = () => {
             <label htmlFor="active" className="text-lg">Active</label>
           </div>
 
-          <div className="flex items-center mb-3">
+          <div className="flex items-center mb-3 px-3 py-2 border border-gray-200 rounded-lg cursor-pointer">
             <input
               type="radio"
               id="banned"
@@ -54,7 +54,7 @@ const UserDetailPage = () => {
             <label htmlFor="banned" className="text-lg">Banned</label>
           </div>
 
-          <div className="flex items-center">
+          <div className="flex items-center px-3 py-2 border border-gray-200 rounded-lg cursor-pointer">
             <input
               type="radio"
               id="suspended"

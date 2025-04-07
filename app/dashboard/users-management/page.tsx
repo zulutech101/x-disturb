@@ -1,72 +1,36 @@
 "use client"
+import { updateUserStatus, useFetchUsers } from "@/app/api/user-management-api";
 import UserManagementTable from "@/components/dashboard/user-management-table ";
 
-import React, { useState } from "react";
+import React, {  useState } from "react";
 
 
 const Page = () => {
   const [searchQuery,setSearchQuery]=useState("")
-  const [dummyUsers,setDummyUsers]=useState([
-    {
-      id: "1",
-      name: "Meri Nigatu",
-      location: "Meskid",
-      email:"email@gmail.com",
-      status: "ON",
-    },
-    {
-      id: "2",
-      name: "Tilahun Asefa",
-      location: "Abrihot",
-      email:"email@gmail.com",
-      status: "ON",
-    },
-    {
-      id: "3",
-      name: "Ashetu Birehanu",
-      location: "Hotel",
-      email:"email@gmail.com",
-      status: "OFF",
-    },
-    {
-      id: "4",
-      name: "Ashebier Kidane",
-      location: "Park",
-      email:"email@gmail.com",
-      status: "OFF",
-    },
-    {
-      id: "5",
-      name: "Mariana Asher",
-      location: "Cinema",
-      email:"email@gmail.com",
-      status: "ON",
-    },
-  ])
-
-  const handleToggle = (userId: string) => {
-    setDummyUsers((prevUsers) =>
-      prevUsers.map((user) =>
-        user.id === userId
-          ? { ...user, status: user.status === "ON" ? "OFF" : "ON" } 
-          : user 
-      )
-    );
+  const { users, loading } = useFetchUsers();
+  
+  const handleToggleStatus = async (userId: string, currentStatus: boolean) => {
+    const result = await updateUserStatus(userId, currentStatus);
+    if (!result.success) {
+      alert(result.message); // Handle error as needed
+    }
   };
 
-  const visibleDtata = dummyUsers.filter(
+
+
+  const visibleDtata = users.filter(
     (user) =>
-      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchQuery.toLowerCase())
+      user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.email?.toLowerCase().includes(searchQuery.toLowerCase())
   );
   return (
     <div className="flex bg-white dark:bg-inherit text-gray-950 dark:text-white flex-col gap-8">
-      <p className="text-xl font-medium leading-5">Users Management</p>
+      <p className="text-3xl font-bold leading-5">Users Management</p>
       <div className="relative">
         <input
           type="text"
           onChange={(e)=>setSearchQuery(e.target.value)}
-          className="h-10 rounded-md w-4/5 bg-gray-200 dark:bg-gray-700 text-gray-950 dark:text-white placeholder:text-gray-400 p-3 pl-10"
+          className="h-10 rounded-md w-4/5 bg-gray-100 dark:bg-gray-700 text-gray-950 dark:text-white placeholder:text-gray-400 p-3 pl-10"
           placeholder="Search by name or email"
         />
         <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
@@ -87,7 +51,7 @@ const Page = () => {
         </span>
       </div>
 
-      <UserManagementTable users={visibleDtata} handleToggle={handleToggle} />
+      <UserManagementTable users={visibleDtata} handleToggle={handleToggleStatus} isLoading={loading}/>
     </div>
   );
 };
