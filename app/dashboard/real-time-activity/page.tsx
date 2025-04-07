@@ -26,36 +26,37 @@ import Image from "next/image";
 
 const dummyData = [
   {
-    user: "Ethan Clark",
+    user: "Abel Tadesse",
     zone: "Downtown Business District",
     activity: "Entered Zone",
     timestamp: "10:15 AM",
   },
   {
-    user: "Olivia Ramirez",
+    user: "Mahi Abebe",
     zone: "Residential Area Alpha",
     activity: "Exited Zone",
     timestamp: "10:22 AM",
   },
   {
-    user: "Nathan Walker",
+    user: "Biniam Mekonnen",
     zone: "Commercial Zone B",
     activity: "Entered Zone",
     timestamp: "10:30 AM",
   },
   {
-    user: "Ava Turner",
+    user: "Hanna Fikre",
     zone: "Downtown Business District",
     activity: "Inside Zone",
     timestamp: "10:45 AM",
   },
   {
-    user: "Liam Foster",
+    user: "Samuel Getachew",
     zone: "Residential Area Alpha",
     activity: "Exited Zone",
     timestamp: "11:00 AM",
   },
 ];
+
 
 interface Filters {
   insideZones: boolean;
@@ -146,15 +147,15 @@ const Page = () => {
         <h3 className="text-xl font-semibold">User Activity</h3>
         <div className="space-y-4 mt-4">
           {/* User Cards */}
-          {[{ name: "Marcus Levin", zone: "Downtown Business District" },
-            { name: "Jocelyn Dokidis", zone: "Downtown Business District" },
-            { name: "Miracle Dias", zone: "Downtown Business District" }].map(
+          {[ { name: "Daniel Kebede", zone: "Downtown Business District" },
+  { name: "Belay Meles", zone: "Downtown Business District" },
+  { name: "Yordanos Bekele", zone: "Downtown Business District" }].map(
               (user, index) => (
                 <div key={index} className="flex items-center space-x-4">
                   <Image
                   width={48}
                   height={48}
-                    src={`https://i.pravatar.cc/150?img=${index + 1}`}
+                    src={`/U${index+1}.png`}
                     alt="User avatar"
                     className="w-12 h-12 rounded-full object-cover"
                   />
