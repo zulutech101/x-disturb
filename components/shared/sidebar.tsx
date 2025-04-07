@@ -51,8 +51,15 @@ export default function AppSidebar() {
     >
       {/* Sidebar Header */}
       <SidebarHeader className="relative mb-4 px-2">
-        {!isCollapsed && (
-          <h1 className="text-lg font-bold tracking-wide text-white">
+        {isCollapsed ? (
+          <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow cursor-pointer hover:scale-110 transition-transform">
+          <h1 className="text-lg font-black bg-gradient-to-r from-[#E66641] to-[#F2A58E] bg-clip-text text-transparent select-none">
+            X
+          </h1>
+        </div>
+        
+        ) : (
+          <h1 className="text-lg italic font-bold tracking-wide text-white">
             x-disturb
           </h1>
         )}
