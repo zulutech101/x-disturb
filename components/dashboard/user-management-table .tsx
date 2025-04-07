@@ -15,7 +15,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import { Pen, Trash2, LoaderCircle } from "lucide-react";
+import {  Trash2, LoaderCircle, Edit } from "lucide-react";
 import { User } from "@/app/api/user-management-api";
 // import { useRouter } from "next/navigation";
 
@@ -77,16 +77,19 @@ const UserManagementTable = ({
                   <TableCell className="px-6 py-4 text-sm text-gray-500  dark:text-gray-200">
                     {user.email}
                   </TableCell>
-                  <TableCell className="flex items-center gap-4 px-6 py-4 text-sm ">
+                  <TableCell className="flex items-center gap-3 px-6 py-4 text-sm">
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Pen className="mr-2 text-blue-900 dark:text-blue-500 cursor-pointer" />
+                          <button
+                            className="p-2 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors"
+                            aria-label="Edit user"
+                          >
+                            <Edit className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                          </button>
                         </TooltipTrigger>
-                        <TooltipContent className="p-0">
-                          <div className="bg-white  border-gray-200 shadow-md shadow-gray-400 text-gray-900 w-20 px-4  py-2 rounded-full text-center z-10">
-                            Edit
-                          </div>
+                        <TooltipContent side="top" className="bg-white">
+                          <span className="text-sm">Edit</span>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
@@ -94,53 +97,40 @@ const UserManagementTable = ({
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Trash2 className="text-red-600 cursor-pointer" />
+                          <button
+                            className="p-2 rounded-full hover:bg-red-100 dark:hover:bg-red-900 transition-colors"
+                            aria-label="Delete user"
+                          >
+                            <Trash2 className="w-5 h-5 text-red-600 dark:text-red-400" />
+                          </button>
                         </TooltipTrigger>
-                        <TooltipContent className="p-0">
-                          <div className="bg-white border-gray-200 text-red-500 shadow-md shadow-gray-500  w-20 text-center px-4 py-2 rounded-full z-10">
-                            Delete
-                          </div>
+                        <TooltipContent side="top" className="bg-white">
+                          <span className="text-sm text-red-500">Delete</span>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
                   </TableCell>
 
                   <TableCell>
-                    <div className="relative inline-block w-20 h-8">
+                    <label className="relative inline-flex items-center cursor-pointer">
                       <input
                         type="checkbox"
                         checked={user.isActive}
                         onChange={() => handleToggle(user.id, user.isActive)}
-                        id={`switch-${user.id}`}
-                        className="opacity-0 w-0 h-0"
+                        className="sr-only peer"
                       />
-                      <label
-                        htmlFor={`switch-${user.id}`}
-                        className={`absolute w-full h-full bg-gray-300 rounded-full cursor-pointer transition-colors duration-300 ${
-                          user.isActive
-                            ? "bg-green-500"
-                            : "bg-white dark:bg-gray-400 border border-gray-400 dark:border-gray-200"
+                      <div className="w-12 h-6 bg-gray-300 peer-checked:bg-green-500 rounded-full transition-colors duration-300"></div>
+                      <div
+                        className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transform transition-transform duration-300 ${
+                          user.isActive ? "translate-x-6" : ""
                         }`}
-                      >
-                        <span
-                          className={`absolute  top-1 w-6 h-6  rounded-full transition-transform duration-300 ${
-                            user.isActive
-                              ? "transform translate-x-8 bg-white right-9"
-                              : "bg-gray-400 dark:bg-white left-1"
-                          }`}
-                        ></span>
-                        <span
-                          className={`absolute w-full h-full flex justify-center items-center text-xs  font-medium ${
-                            user.isActive
-                              ? "-left-2 text-white"
-                              : "-right-2 text-gray-400 dark:text-white"
-                          }`}
-                        >
-                          {user.isActive ? "ON" : "OFF"}
-                        </span>
-                      </label>
-                    </div>
+                      ></div>
+                      <span className="ml-3 text-sm text-gray-700 dark:text-gray-300 font-medium">
+                        {user.isActive ? "On" : "Off"}
+                      </span>
+                    </label>
                   </TableCell>
+
                   {/* </Link> */}
                 </TableRow>
               ))}

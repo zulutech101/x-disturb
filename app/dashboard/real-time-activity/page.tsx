@@ -152,6 +152,8 @@ const Page = () => {
               (user, index) => (
                 <div key={index} className="flex items-center space-x-4">
                   <Image
+                  width={48}
+                  height={48}
                     src={`https://i.pravatar.cc/150?img=${index + 1}`}
                     alt="User avatar"
                     className="w-12 h-12 rounded-full object-cover"
