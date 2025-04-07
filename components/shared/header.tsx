@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Bell } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -16,34 +16,67 @@ import { session } from "@/lib/sessionStorage";
 import { signOut } from "firebase/auth";
 import { Skeleton } from "../ui/skeleton";
 
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/app/firebase/config";
+
 export const Header = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const router = useRouter();
+
+  const [profileData, setProfileData] = useState<any>(null);
+  const [fetchLoading, setFetchLoading] = useState(true);
+
   const handleLogout = () => {
     signOut(auth);
     session.clear();
   };
 
+  let id = session?.getItem("userId") || "admin_id";
+
   const { user, loading } = useAuthChecker();
   const username = user?.email?.split("@")[0] ?? "";
-  const capitalizedInitials = username
+  let capitalizedInitials = username
     ? username
         .split(".")
         .map((word) => word[0]?.toUpperCase() ?? "")
         .join("")
     : "U";
 
+  useEffect(() => {
+    const fetchAdminProfile = async () => {
+      try {
+        const docRef = doc(db, "admin_profile", id);
+        const docSnap = await getDoc(docRef); // Await the promise
+        if (docSnap.exists()) {
+          setProfileData(docSnap.data());
+          console.log("Fetched profile data:", docSnap.data());
+        } else {
+          console.log("No such document!");
+        }
+      } catch (error) {
+        console.error("Error fetching admin profile:", error);
+      } finally {
+        setFetchLoading(false);
+      }
+    };
+
+    fetchAdminProfile();
+  }, [id]);
+
   return (
     <header className="border-b border-gray-200 flex justify-end">
       <div className="container px-4 py-4 flex justify-end items-center">
         <div className="flex items-center gap-4">
-          <button onClick={() => router.push("/dashboard/notification")} className="p-2 relative cursor-pointer">
+          <button
+            onClick={() => router.push("/dashboard/notification")}
+            className="p-2 relative cursor-pointer"
+          >
             <Bell className="h-6 w-6 text-gray-700" />
           </button>
 
           <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
             <DropdownMenuTrigger className="flex items-center gap-2 outline-none">
-              {loading ? (
+              {loading || fetchLoading ? (
                 <div className="flex items-center gap-3">
                   <Skeleton className="h-9 w-9 rounded-full" />
                   <div className="hidden md:block space-y-1">
@@ -55,11 +88,14 @@ export const Header = () => {
                 <div className="flex items-center gap-3">
                   <Avatar>
                     <AvatarFallback className="bg-orange-500 text-white">
-                      {capitalizedInitials}
+                      {profileData?.username[0]?.toUpperCase() ||
+                        capitalizedInitials}
                     </AvatarFallback>
                   </Avatar>
                   <div className="hidden md:block text-left">
-                    <div className="font-medium capitalize">{username}</div>
+                    <div className="font-medium capitalize">
+                      {profileData?.username || username}
+                    </div>
                     <div className="text-xs text-gray-500">Administrator</div>
                   </div>
                 </div>
@@ -85,7 +121,7 @@ export const Header = () => {
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="end"
-              className="w-56 bg-white border !border-gray-300 "
+              className="w-56 bg-white border !border-gray-300"
             >
               <DropdownMenuItem
                 onClick={() => router.push("/dashboard/profile")}
