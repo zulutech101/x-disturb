@@ -18,20 +18,19 @@ declare global {
   }
 }
 type HereMapProps = {
-  onCoordinatesChange: (coords: { lat: number; lng: number }) => void;
+  onCoordinatesChange: (coords: { lat: string; lng: string }) => void;
 };
 const HereMap = ({ onCoordinatesChange }: HereMapProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const [coordinates, setCoordinates] = useState<{
-    lat: number | null;
-    lng: number | null;
+    lat: string | null;
+    lng: string | null;
   }>({
     lat: null,
     lng: null,
   });
-  });
 
-  const updateCoordinates = (coord: { lat: number; lng: number }) => {
+  const updateCoordinates = (coord: { lat: string; lng: string }) => {
     setCoordinates(coord);
     onCoordinatesChange(coord);
   };
@@ -43,7 +42,6 @@ const HereMap = ({ onCoordinatesChange }: HereMapProps) => {
   const markersRef = useRef<any[]>([]);
 
   const apikey: string = process.env.NEXT_PUBLIC_HERE_API_KEY || "";
-  const apikey: string = process.env.NEXT_PUBLIC_HERE_API_KEY || "";
 
   // Load HERE Maps scripts
   useEffect(() => {
@@ -51,36 +49,19 @@ const HereMap = ({ onCoordinatesChange }: HereMapProps) => {
       setError("API key is missing. Please check your environment variables.");
       setIsMapLoading(false);
       return;
-      setError("API key is missing. Please check your environment variables.");
-      setIsMapLoading(false);
-      return;
     }
 
-    setIsMapLoading(true);
     setIsMapLoading(true);
 
     // Function to initialize map after scripts are loaded
     const initMap = () => {
-      if (!mapRef.current || !window.H) return;
       if (!mapRef.current || !window.H) return;
 
       try {
         const H = window.H;
         const platform = new H.service.Platform({ apikey });
         const defaultLayers = platform.createDefaultLayers();
-        const H = window.H;
-        const platform = new H.service.Platform({ apikey });
-        const defaultLayers = platform.createDefaultLayers();
 
-        const hereMap = new H.Map(
-          mapRef.current,
-          defaultLayers.vector.normal.map,
-          {
-            center: { lat: 9, lng: 38 },
-            zoom: 13,
-            pixelRatio: window.devicePixelRatio || 1,
-          }
-        );
         const hereMap = new H.Map(
           mapRef.current,
           defaultLayers.vector.normal.map,
@@ -93,10 +74,7 @@ const HereMap = ({ onCoordinatesChange }: HereMapProps) => {
 
         const mapEvents = new H.mapevents.MapEvents(hereMap);
         new H.mapevents.Behavior(mapEvents);
-        const mapEvents = new H.mapevents.MapEvents(hereMap);
-        new H.mapevents.Behavior(mapEvents);
 
-        H.ui.UI.createDefault(hereMap, defaultLayers);
         H.ui.UI.createDefault(hereMap, defaultLayers);
 
         hereMap.addEventListener("tap", (evt: any) => {
@@ -104,19 +82,16 @@ const HereMap = ({ onCoordinatesChange }: HereMapProps) => {
             evt.currentPointer.viewportX,
             evt.currentPointer.viewportY
           );
-          const coord = hereMap.screenToGeo(
-            evt.currentPointer.viewportX,
-            evt.currentPointer.viewportY
-          );
 
           if (coord) {
             // Update coordinates for UI
-            updateCoordinates(coord);
+            updateCoordinates({
+              lat: coord.lat.toFixed(6),
+              lng: coord.lng.toFixed(6),
+            });
 
             // Clear previous markers
             if (markersRef.current.length > 0) {
-              hereMap.removeObjects(markersRef.current);
-              markersRef.current = [];
               hereMap.removeObjects(markersRef.current);
               markersRef.current = [];
             }
@@ -125,15 +100,9 @@ const HereMap = ({ onCoordinatesChange }: HereMapProps) => {
             const marker = new H.map.Marker(coord);
             hereMap.addObject(marker);
             markersRef.current.push(marker);
-            const marker = new H.map.Marker(coord);
-            hereMap.addObject(marker);
-            markersRef.current.push(marker);
           }
         });
-        });
 
-        setMap(hereMap);
-        setIsMapLoading(false);
         setMap(hereMap);
         setIsMapLoading(false);
       } catch (err) {
@@ -144,23 +113,11 @@ const HereMap = ({ onCoordinatesChange }: HereMapProps) => {
           }`
         );
         setIsMapLoading(false);
-        console.error("Map initialization error:", err);
-        setError(
-          `Map initialization failed: ${
-            err instanceof Error ? err.message : String(err)
-          }`
-        );
-        setIsMapLoading(false);
       }
-    };
     };
 
     // Load scripts in sequence with callbacks
     const loadScript = (url: string, callback: () => void) => {
-      const script = document.createElement("script");
-      script.type = "text/javascript";
-      script.src = url;
-      script.onload = callback;
       const script = document.createElement("script");
       script.type = "text/javascript";
       script.src = url;
@@ -171,17 +128,8 @@ const HereMap = ({ onCoordinatesChange }: HereMapProps) => {
       };
       document.head.appendChild(script);
     };
-        setError("Failed to load HERE Maps scripts. Please try again later.");
-        setIsMapLoading(false);
-      };
-      document.head.appendChild(script);
-    };
 
     // Load CSS
-    const link = document.createElement("link");
-    link.rel = "stylesheet";
-    link.href = "https://js.api.here.com/v3/3.1/mapsjs-ui.css";
-    document.head.appendChild(link);
     const link = document.createElement("link");
     link.rel = "stylesheet";
     link.href = "https://js.api.here.com/v3/3.1/mapsjs-ui.css";
@@ -210,48 +158,21 @@ const HereMap = ({ onCoordinatesChange }: HereMapProps) => {
         });
       });
     });
-          loadScript(
-            "https://js.api.here.com/v3/3.1/mapsjs-mapevents.js",
-            () => {
-              // All scripts loaded, initialize map
-              setTimeout(() => {
-                if (window.H) {
-                  initMap();
-                } else {
-                  setError(
-                    "HERE Maps API failed to initialize. Please refresh the page."
-                  );
-                  setIsMapLoading(false);
-                }
-              }, 100); // Small delay to ensure scripts are fully initialized
-            }
-          );
-        });
-      });
-    });
 
     return () => {
       if (map) {
         map.dispose();
-        map.dispose();
       }
-    };
-  }, [apikey]);
     };
   }, [apikey]);
 
   // Use direct REST API for geocoding instead of the service API
-  const handleSearch = async (e: React.MouseEvent<HTMLButtonElement>) => {
   const handleSearch = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation(); // 🔥 prevent any bubbling weirdness
 
     if (!searchQuery || !map) return;
 
-    if (!searchQuery || !map) return;
-
-    setIsLoading(true);
-    setError(null);
     setIsLoading(true);
     setError(null);
 
@@ -259,37 +180,29 @@ const HereMap = ({ onCoordinatesChange }: HereMapProps) => {
       // Use the REST API directly
       const encodedQuery = encodeURIComponent(searchQuery);
       const url = `https://geocode.search.hereapi.com/v1/geocode?q=${encodedQuery}&apiKey=${apikey}`;
-      const encodedQuery = encodeURIComponent(searchQuery);
-      const url = `https://geocode.search.hereapi.com/v1/geocode?q=${encodedQuery}&apiKey=${apikey}`;
 
-      const response = await fetch(url);
       const response = await fetch(url);
 
       if (!response.ok) {
         throw new Error(
           `Geocoding request failed with status: ${response.status}`
         );
-        throw new Error(
-          `Geocoding request failed with status: ${response.status}`
-        );
       }
 
-      const data = await response.json();
       const data = await response.json();
 
       if (data.items && data.items.length > 0) {
         const position = data.items[0].position;
-        updateCoordinates(position);
+        updateCoordinates({
+          lat: position.lat.toFixed(6),
+          lng: position.lng.toFixed(6),
+        });
 
-        map.setCenter({ lat: position.lat, lng: position.lng });
-        map.setZoom(14);
         map.setCenter({ lat: position.lat, lng: position.lng });
         map.setZoom(14);
 
         // Clear previous markers
         if (markersRef.current.length > 0) {
-          map.removeObjects(markersRef.current);
-          markersRef.current = [];
           map.removeObjects(markersRef.current);
           markersRef.current = [];
         }
@@ -300,7 +213,6 @@ const HereMap = ({ onCoordinatesChange }: HereMapProps) => {
         markersRef.current.push(marker);
       } else {
         setError("No results found for your search query.");
-        setError("No results found for your search query.");
       }
     } catch (error) {
       console.error("Search error:", error);
@@ -309,17 +221,9 @@ const HereMap = ({ onCoordinatesChange }: HereMapProps) => {
           error instanceof Error ? error.message : String(error)
         }`
       );
-      console.error("Search error:", error);
-      setError(
-        `Search failed: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
     } finally {
       setIsLoading(false);
-      setIsLoading(false);
     }
-  };
   };
 
   return (
@@ -368,7 +272,6 @@ const HereMap = ({ onCoordinatesChange }: HereMapProps) => {
           className={cn(
             "relative w-full h-[400px] bg-slate-100 rounded-md overflow-hidden",
             isMapLoading && "flex items-center justify-center"
-            isMapLoading && "flex items-center justify-center"
           )}
         >
           {isMapLoading && (
@@ -393,9 +296,6 @@ const HereMap = ({ onCoordinatesChange }: HereMapProps) => {
               <span className="text-sm font-medium">
                 Lat: {coordinates.lat}
               </span>
-              <span className="text-sm font-medium">
-                Lat: {coordinates.lat}
-              </span>
             </div>
             <div className="flex items-center">
               <MapPin className="h-4 w-4 mr-1 text-primary" />
@@ -409,8 +309,5 @@ const HereMap = ({ onCoordinatesChange }: HereMapProps) => {
     </Card>
   );
 };
-  );
-};
 
-export default HereMap;
 export default HereMap;

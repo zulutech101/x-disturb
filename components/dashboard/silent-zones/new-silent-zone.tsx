@@ -32,8 +32,8 @@ import HereMap from "./HereMap";
 import AddressField from "./AddressSuggestion";
 
 const CenterSchema = z.object({
-  latitude: z.number(),
-  longitude: z.number(),
+  latitude: z.string(),
+  longitude: z.string(),
 });
 
 const formSchema = z.object({
@@ -62,8 +62,8 @@ export default function CreateSilentZone() {
       address: "",
       adminID: session?.getItem("userId") || "admin_user",
       center: {
-        latitude: 0,
-        longitude: 0,
+        latitude: "0",
+        longitude: "0",
       },
       description: "",
       isActive: true,
@@ -73,11 +73,25 @@ export default function CreateSilentZone() {
     },
   });
 
+  // const fetchSessionData = async () => {
+  //   const userId = await session.getItem("userId");
+  //   form.setValue("adminID", userId || "admin_user");
+  // };
+
+  console.log("form values admin ID", session.getItem("userId"));
+
+  console.log("form", form.getValues());
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    console.log({ values });
     setIsAdding(true);
     try {
       const docRef = await addDoc(collection(db, "silent_zones"), {
         ...values,
+        center: {
+          latitude: Number(values.center.latitude),
+          longitude: Number(values.center.longitude),
+        },
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
