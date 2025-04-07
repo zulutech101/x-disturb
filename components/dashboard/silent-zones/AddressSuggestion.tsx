@@ -78,7 +78,7 @@ const AddressField: React.FC<AddressFieldProps> = ({
   };
 
   return (
-    <div className="md:w-1/2 space-y-2 relative">
+    <div className="md:w-full space-y-2 relative">
       <div className="relative">
         <Input
           placeholder={placeholder}

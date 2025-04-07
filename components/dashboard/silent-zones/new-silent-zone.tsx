@@ -153,7 +153,7 @@ export default function CreateSilentZone() {
             control={form.control}
             name="address"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="w-1/2">
                 <FormLabel>Address</FormLabel>
                 <FormControl>
                   <AddressField

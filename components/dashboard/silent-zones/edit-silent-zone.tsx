@@ -32,6 +32,7 @@ import { session } from "@/lib/sessionStorage";
 import { useEffect, useState } from "react";
 import HereMap from "./HereMap";
 import { useSearchParams } from "next/navigation";
+import AddressField from "./AddressSuggestion";
 
 const CenterSchema = z.object({
   latitude: z.string(),
@@ -165,23 +166,25 @@ export default function UpdateSilentZone() {
           />
 
           {/* Address */}
-          <FormField
-            control={form.control}
-            name="address"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Address</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Enter address"
-                    {...field}
-                    className="md:w-1/2"
-                  />
-                </FormControl>
-                <FormMessage className="text-sm text-red-600" />
-              </FormItem>
-            )}
-          />
+       {/* Address (Using Custom AddressField Component) */}
+<FormField
+  control={form.control}
+  name="address"
+  render={({ field }) => (
+    <FormItem className="md:w-1/2">
+      <FormLabel>Address</FormLabel>
+      <FormControl>
+        <AddressField
+          value={field.value}
+          onSelect={(val: string) => form.setValue("address", val)}
+         
+        />
+      </FormControl>
+      <FormMessage className="text-sm text-red-600" />
+    </FormItem>
+  )}
+/>
+
 
           {/* Type */}
           <FormField

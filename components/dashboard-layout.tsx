@@ -1,9 +1,10 @@
-"use client";
-import { Header } from "@/components/shared/header";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+"use client"
 import AppSidebar from "./shared/sidebar";
+import { Header } from "./shared/header";
 import { useAuthChecker } from "@/hooks/useAuthChecker";
 import { LoaderCircle } from "lucide-react";
+import { SidebarProvider, SidebarInset } from "./ui/sidebar";
+import MobileSidebar from "./shared/mobileSidebar";
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { loading } = useAuthChecker();
@@ -17,12 +18,17 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <SidebarProvider> {/* 👈 wrap entire layout including AppSidebar */}
-      <div className="h-screen w-full flex">
-        {/* Sidebar full height on the left */}
-        <AppSidebar />
+    <SidebarProvider>
+      <div className="h-screen w-full flex relative">
+        {/* Desktop Sidebar */}
+        <div className="hidden md:block">
+          <AppSidebar />
+        </div>
 
-        {/* Main content: header + page */}
+        {/* Mobile Sidebar */}
+        <MobileSidebar />
+
+        {/* Main content */}
         <div className="flex flex-col flex-1 overflow-hidden">
           <Header />
           <SidebarInset className="flex-1 overflow-y-auto p-8 scrollbar-hide">
