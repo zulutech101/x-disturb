@@ -31,8 +31,8 @@ import { useState } from "react";
 import HereMap from "./HereMap";
 
 const CenterSchema = z.object({
-  latitude: z.string(),
-  longitude: z.string(),
+  latitude: z.number(),
+  longitude: z.number(),
 });
 
 const formSchema = z.object({
@@ -61,8 +61,8 @@ export default function CreateSilentZone() {
       address: "",
       adminID: session?.getItem("userId") || "admin_user",
       center: {
-        latitude: "0",
-        longitude: "0",
+        latitude: 0,
+        longitude: 0,
       },
       description: "",
       isActive: true,
@@ -196,7 +196,7 @@ export default function CreateSilentZone() {
 
           {/* Map Component */}
 
-          <HereMap  
+          <HereMap
             onCoordinatesChange={(coords) => {
               form.setValue("center.latitude", coords.lat);
               form.setValue("center.longitude", coords.lng);
