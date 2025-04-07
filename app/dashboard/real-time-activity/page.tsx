@@ -22,6 +22,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import HereMap from "@/components/dashboard/silent-zones/HereMap";
+import Image from "next/image";
 
 const dummyData = [
   {
@@ -78,7 +79,6 @@ const Page = () => {
     setFilters((prev) => ({ ...prev, [filter]: !prev[filter] }));
   };
   const handleApplyFilters = () => {
-    // Handle applying the filter here (maybe by fetching data based on the filter)
     console.log("Filters applied:", filters);
   };
 
@@ -151,7 +151,7 @@ const Page = () => {
             { name: "Miracle Dias", zone: "Downtown Business District" }].map(
               (user, index) => (
                 <div key={index} className="flex items-center space-x-4">
-                  <img
+                  <Image
                     src={`https://i.pravatar.cc/150?img=${index + 1}`}
                     alt="User avatar"
                     className="w-12 h-12 rounded-full object-cover"
