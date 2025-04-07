@@ -44,7 +44,8 @@ export default function AppSidebar() {
   return (
     <Sidebar
       collapsible="icon"
-      className="bg-[#E66641] text-white top-16 p-4 !h-[calc(100svh-var(--header-height))]"
+      className="h-screen p-4 bg-[#E66641] text-white"
+
     >
       <SidebarHeader />
       <SidebarContent>
