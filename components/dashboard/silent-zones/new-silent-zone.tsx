@@ -29,6 +29,7 @@ import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { session } from "@/lib/sessionStorage";
 import { useState } from "react";
 import HereMap from "./HereMap";
+import AddressField from "./AddressSuggestion";
 
 const CenterSchema = z.object({
   latitude: z.string(),
@@ -141,10 +142,9 @@ export default function CreateSilentZone() {
               <FormItem>
                 <FormLabel>Address</FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder="Enter address"
-                    {...field}
-                    className="md:w-1/2"
+                  <AddressField
+                    value={field.value}
+                    onSelect={(val: string) => form.setValue("address", val)}
                   />
                 </FormControl>
                 <FormMessage className="text-sm text-red-600" />
@@ -196,7 +196,7 @@ export default function CreateSilentZone() {
 
           {/* Map Component */}
 
-          <HereMap  
+          <HereMap
             onCoordinatesChange={(coords) => {
               form.setValue("center.latitude", coords.lat);
               form.setValue("center.longitude", coords.lng);
