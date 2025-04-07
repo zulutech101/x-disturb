@@ -66,8 +66,8 @@ const HereMap = ({ onCoordinatesChange }: HereMapProps) => {
           mapRef.current,
           defaultLayers.vector.normal.map,
           {
-            center: { lat: 9, lng: 38 },
-            zoom: 13,
+            center: { lat: 9.0572, lng: 38.7592 },
+            zoom: 12,
             pixelRatio: window.devicePixelRatio || 1,
           }
         );
