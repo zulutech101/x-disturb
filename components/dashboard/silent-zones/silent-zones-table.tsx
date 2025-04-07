@@ -77,9 +77,9 @@ export default function SilentZones() {
   console.log(silentZones);
 
   return (
-    <div className="border rounded-2xl shadow-md overflow-auto">
-      <Table className="min-w-full divide-y divide-gray-200">
-        <TableHeader className="bg-muted sticky top-0 z-10">
+    <div className="border rounded-lg border-gray-300 overflow-auto">
+      <Table className="min-w-full divide-y divide-gray-300">
+        <TableHeader className="bg-muted sticky border-gray-300 top-0 z-10">
           <TableRow>
             <TableHead className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
               Name
