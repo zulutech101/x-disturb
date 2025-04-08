@@ -105,7 +105,7 @@ const UserDetailPage = () => {
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input placeholder="email" {...field} className="md:w-1/2" />
+                  <Input placeholder="email" {...field} className="lg:w-1/2" />
                 </FormControl>
                 <FormMessage className="text-sm text-red-600" />
               </FormItem>
@@ -123,7 +123,7 @@ const UserDetailPage = () => {
                   <Input
                     placeholder="username"
                     {...field}
-                    className="md:w-1/2"
+                    className="lg:w-1/2"
                   />
                 </FormControl>
                 <FormMessage className="text-sm text-red-600" />
@@ -142,7 +142,7 @@ const UserDetailPage = () => {
                   <Input
                     placeholder="enter reason"
                     {...field}
-                    className="md:w-1/2"
+                    className="lg:w-1/2"
                   />
                 </FormControl>
                 <FormMessage className="text-sm text-red-600" />

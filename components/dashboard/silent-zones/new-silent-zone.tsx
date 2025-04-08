@@ -107,7 +107,7 @@ export default function CreateSilentZone() {
   }
 
   return (
-    <div className="w-full mx-auto p-4">
+    <div className="w-full mx-auto">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           {/* Zone Name */}
@@ -153,7 +153,7 @@ export default function CreateSilentZone() {
             control={form.control}
             name="address"
             render={({ field }) => (
-              <FormItem className="w-1/2">
+              <FormItem className="md:w-1/2">
                 <FormLabel>Address</FormLabel>
                 <FormControl>
                   <AddressField
@@ -224,19 +224,38 @@ export default function CreateSilentZone() {
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <div className="flex justify-between space-x-2 items-center">
-                    <FormLabel className="text-nowrap">
-                      Zone Radius (Meters)
-                    </FormLabel>
-                    <Slider
-                      min={1}
-                      max={500}
-                      step={1}
-                      defaultValue={[field.value]}
-                      onValueChange={(vals) => field.onChange(vals[0])}
-                      className="md:w-1/2"
-                    />
-                    <span className="text-sm">{field.value}</span>
+                  <div className="w-full">
+                    <div className="lg:hidden w-full space-y-2">
+                      <Slider
+                        min={1}
+                        max={500}
+                        step={1}
+                        defaultValue={[field.value]}
+                        onValueChange={(vals) => field.onChange(vals[0])}
+                        className="lg:w-1/2"
+                      />
+                      <div className="flex justify-between">
+                        <FormLabel className="text-nowrap">
+                          Zone Radius (Meters)
+                        </FormLabel>
+                        <span className="text-sm">{field.value}</span>
+                      </div>
+                    </div>
+
+                    <div className="w-full justify-between space-x-2 items-center hidden lg:flex">
+                      <FormLabel className="text-nowrap">
+                        Zone Radius (Meters)
+                      </FormLabel>
+                      <Slider
+                        min={1}
+                        max={500}
+                        step={1}
+                        defaultValue={[field.value]}
+                        onValueChange={(vals) => field.onChange(vals[0])}
+                        className="lg:w-1/2"
+                      />
+                      <span className="text-sm">{field.value}</span>
+                    </div>
                   </div>
                 </FormControl>
                 <FormMessage className="text-sm text-red-600" />
