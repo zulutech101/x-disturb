@@ -30,14 +30,9 @@ const HereMap = ({ onCoordinatesChange }: HereMapProps) => {
     lng: null,
   });
 
-  const updateCoordinates = (coord: { lat: number; lng: number }) => {
-    const formattedCoords = {
-      lat: Number(coord.lat).toFixed(6),
-      lng: Number(coord.lng).toFixed(6),
-    };
-
-    setCoordinates(formattedCoords);
-    onCoordinatesChange(formattedCoords);
+  const updateCoordinates = (coord: { lat: string; lng: string }) => {
+    setCoordinates(coord);
+    onCoordinatesChange(coord);
   };
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [map, setMap] = useState<any>(null);
@@ -71,8 +66,8 @@ const HereMap = ({ onCoordinatesChange }: HereMapProps) => {
           mapRef.current,
           defaultLayers.vector.normal.map,
           {
-            center: { lat: 9, lng: 38 },
-            zoom: 13,
+            center: { lat: 9.0572, lng: 38.7592 },
+            zoom: 12,
             pixelRatio: window.devicePixelRatio || 1,
           }
         );
