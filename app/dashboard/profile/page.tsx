@@ -71,7 +71,7 @@ export default function ProfilePage() {
   const [submitting, setSubmitting] = useState(false);
   const router = useRouter();
 
-  let id = session?.getItem("userId") || "admin_id";
+  const id = session?.getItem("userId") || "admin_id";
   // let id = "raawbxCnmrYOT1kmU60WGnmUcv53";
 
   // Initialize React Hook Form with default values and Zod resolver
