@@ -71,4 +71,3 @@ export const updateUserStatus = async (userId: string, currentStatus: boolean) =
     };
   }
 };
-
