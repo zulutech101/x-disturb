@@ -32,6 +32,7 @@ import { db } from "@/app/firebase/config";
 // import TimeZoneField from "@/components/dashboard/profile/TimeZoneInput";
 
 import Image from "next/image";
+import { useAdminContext } from "@/components/context-provider";
 
 // Define the Zod schema for form validation
 const profileSchema = z.object({
@@ -70,6 +71,7 @@ const timeZones = [
 export default function ProfilePage() {
   const [submitting, setSubmitting] = useState(false);
   const router = useRouter();
+  const { triggerRefetch } = useAdminContext();
 
   const id = session?.getItem("userId") || "admin_id";
   // let id = "raawbxCnmrYOT1kmU60WGnmUcv53";
@@ -116,6 +118,9 @@ export default function ProfilePage() {
     try {
       const docRef = doc(db, "admin_profile", id);
       await updateDoc(docRef, data);
+
+      triggerRefetch();
+
       console.log("Admin profile updated successfully!");
     } catch (err) {
       console.error("Error updating admin profile:", err);
