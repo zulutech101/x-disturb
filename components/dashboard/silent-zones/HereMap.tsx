@@ -227,7 +227,7 @@ const HereMap = ({ onCoordinatesChange }: HereMapProps) => {
   };
 
   return (
-    <Card className="w-full  mx-auto shadow-lg">
+    <Card className="w-full mx-auto shadow-lg">
       {/* <CardHeader>
           <CardTitle className="text-center">HERE Maps Explorer</CardTitle>
         </CardHeader> */}

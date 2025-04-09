@@ -29,7 +29,10 @@ import { session } from "@/lib/sessionStorage";
 import { useEffect, useState } from "react";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "@/app/firebase/config";
-import TimeZoneField from "@/components/dashboard/profile/TimeZoneInput";
+// import TimeZoneField from "@/components/dashboard/profile/TimeZoneInput";
+
+import Image from "next/image";
+import { useAdminContext } from "@/components/context-provider";
 
 // Define the Zod schema for form validation
 const profileSchema = z.object({
@@ -68,8 +71,9 @@ const timeZones = [
 export default function ProfilePage() {
   const [submitting, setSubmitting] = useState(false);
   const router = useRouter();
+  const { triggerRefetch } = useAdminContext();
 
-  let id = session?.getItem("userId") || "admin_id";
+  const id = session?.getItem("userId") || "admin_id";
   // let id = "raawbxCnmrYOT1kmU60WGnmUcv53";
 
   // Initialize React Hook Form with default values and Zod resolver
@@ -114,6 +118,9 @@ export default function ProfilePage() {
     try {
       const docRef = doc(db, "admin_profile", id);
       await updateDoc(docRef, data);
+
+      triggerRefetch();
+
       console.log("Admin profile updated successfully!");
     } catch (err) {
       console.error("Error updating admin profile:", err);
@@ -133,8 +140,14 @@ export default function ProfilePage() {
             <section>
               <h2 className="text-lg font-medium mb-4">Basic Info</h2>
               <div className="grid md:grid-cols-[200px_1fr] gap-6 items-start">
-                <div className="bg-[#e76f51] aspect-square max-w-[200px] rounded-md flex items-center justify-center text-white text-4xl">
-                  B
+                <div className="aspect-square max-w-[200px] rounded-md flex items-center justify-center text-white text-4xl">
+                  {/* B */}
+                  <Image
+                    src="/placeholder.png"
+                    alt="B"
+                    width={180}
+                    height={180}
+                  />
                 </div>
                 <div className="space-y-8">
                   <section className="space-y-4">

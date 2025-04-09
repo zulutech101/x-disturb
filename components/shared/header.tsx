@@ -18,6 +18,7 @@ import { Skeleton } from "../ui/skeleton";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/app/firebase/config";
 import NotificationPanel from "../dashboard/notification/notification-panel";
+import { useAdminContext } from "../context-provider";
 
 export const Header = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -26,6 +27,7 @@ export const Header = () => {
   /* eslint-disable */
   const [profileData, setProfileData] = useState<any>(null);
   const [fetchLoading, setFetchLoading] = useState(true);
+  const { triggerRefetch } = useAdminContext();
 
   const handleLogout = () => {
     signOut(auth);
@@ -62,7 +64,9 @@ export const Header = () => {
     };
 
     fetchAdminProfile();
-  }, [id]);
+  }, [id, triggerRefetch]);
+
+  console.log(profileData);
 
   return (
     <header className="border-b border-gray-200 flex justify-end">
@@ -84,13 +88,12 @@ export const Header = () => {
                 <div className="flex items-center gap-3">
                   <Avatar>
                     <AvatarFallback className="bg-orange-500 text-white">
-                      {profileData?.username[0]?.toUpperCase() ||
-                        capitalizedInitials}
+                      {profileData?.username[0]?.toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <div className="hidden md:block text-left">
                     <div className="font-medium capitalize">
-                      {profileData?.username || username}
+                      {profileData?.username}
                     </div>
                     <div className="text-xs text-gray-500">Administrator</div>
                   </div>

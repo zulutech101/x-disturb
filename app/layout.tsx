@@ -4,6 +4,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ReduxProvider } from "@/providers/redux-provider";
+import { AdminContextProvider } from "@/components/context-provider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -27,9 +28,10 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            {children}
+            <AdminContextProvider>{children}</AdminContextProvider>
           </ThemeProvider>
         </ReduxProvider>
+
       </body>
     </html>
   );

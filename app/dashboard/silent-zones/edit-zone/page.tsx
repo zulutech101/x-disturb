@@ -8,10 +8,10 @@ const Page = () => {
 
   return (
     <div>
-      <Button variant="link" onClick={() => router.back()}>
+      <Button className="px-0" variant="link" onClick={() => router.back()}>
         <p className="text-sm">Silent Zones/ Edit Zone</p>
       </Button>
-      <h1 className="text-2xl font-medium tracking-tight p-4">
+      <h1 className="text-2xl font-medium tracking-tight py-4">
         Edit Silent Zone
       </h1>
       <UpdateSilentZone />
