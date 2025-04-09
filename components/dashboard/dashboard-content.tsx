@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import DashboardCharts from "./dashboard-charts";
 import MetricCard from "./metric-card";
-import MostActiveLocation from "./most-active-location";
+import TopPerformingLocation from "./top-performing-location";
 
 export function DashboardContent() {
   return (
@@ -67,7 +67,7 @@ export function DashboardContent() {
         </div>
       </div>
       <DashboardCharts />
-      <MostActiveLocation />
+      <TopPerformingLocation />
     </div>
   );
 }

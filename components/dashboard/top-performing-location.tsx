@@ -38,7 +38,7 @@ const libraryData: LibraryData[] = Array(4).fill({
   occupancyPercentage: 85,
 });
 
-export default function MostActiveLocation() {
+export default function TopPerformingLocation() {
   return (
     <div className="w-full mx-auto mb-10">
       <h1 className="text-2xl font-bold mb-4">Most Active Location</h1>

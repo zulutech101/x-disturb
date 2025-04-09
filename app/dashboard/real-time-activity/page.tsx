@@ -43,12 +43,15 @@ const Page = () => {
   });
 
   const { activities, loading } = useZoneActivities();
+ 
   const recentUniqueUsers = Array.from(
     new Map(activities.map((a) => [a.userID, a])).values()
   ).slice(0, 3);
+
   const handleChange = (filter: keyof Filters) => {
     setFilters((prev) => ({ ...prev, [filter]: !prev[filter] }));
   };
+  
   const handleApplyFilters = () => {
     console.log("Filters applied:", filters);
   };
@@ -229,7 +232,9 @@ const Page = () => {
                       <TableCell className="flex items-center gap-4 px-6 py-4 text-sm">
                         {user.activity}
                       </TableCell>
-                      <TableCell>{user.timestamp}</TableCell>
+                      <TableCell className="px-6 py-4 text-sm text-gray-900 dark:text-gray-200">
+                        {user.timestamp}
+                      </TableCell>
                     </TableRow>
                   ))}
             </TableBody>
