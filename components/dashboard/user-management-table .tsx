@@ -15,8 +15,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import {  Trash2, LoaderCircle, Edit } from "lucide-react";
+import { Trash2, LoaderCircle, Edit } from "lucide-react";
 import { User } from "@/app/api/user-management-api";
+import Link from "next/link";
 // import { useRouter } from "next/navigation";
 
 interface UserManagementTableProps {
@@ -72,21 +73,22 @@ const UserManagementTable = ({
                 >
                   {/* <Link href={`dashboard/users-management/${user.id}`}> */}
                   <TableCell className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-100">
-                    {user.name}
+                    {user.name || "N/A"}
                   </TableCell>
                   <TableCell className="px-6 py-4 text-sm text-gray-500  dark:text-gray-200">
-                    {user.email}
+                    {user.email || "N/A"}
                   </TableCell>
                   <TableCell className="flex items-center gap-3 px-6 py-4 text-sm">
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <button
+                          <Link
+                            href={`users-management/${user.id}`}
                             className="p-2 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors"
                             aria-label="Edit user"
                           >
                             <Edit className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                          </button>
+                          </Link>
                         </TooltipTrigger>
                         <TooltipContent side="top" className="bg-white">
                           <span className="text-sm">Edit</span>

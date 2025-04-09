@@ -45,7 +45,8 @@ const initialNotifications: Notification[] = [
 ];
 
 export default function Notifications() {
-  const [notifications, setNotifications] = useState<Notification[]>(initialNotifications);
+  const [notifications, setNotifications] =
+    useState<Notification[]>(initialNotifications);
 
   const handleClearAll = () => {
     setNotifications([]);
@@ -57,8 +58,8 @@ export default function Notifications() {
 
   return (
     <div className="w-full mx-auto py-6 max-w-6xl">
-      <div className="flex items-center justify-between mb-8">
-        <div>
+      <div className="md:flex items-center justify-between mb-8">
+        <div className="">
           <h1 className="text-2xl font-bold tracking-tight">Notifications</h1>
           <p className="text-sm text-muted-foreground mt-1">
             Recent system notifications and user activities
@@ -78,18 +79,28 @@ export default function Notifications() {
         <Table>
           <TableHeader className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
             <TableRow className="hover:bg-transparent">
-              <TableHead className="font-semibold text-foreground pl-6">User</TableHead>
-              <TableHead className="font-semibold text-foreground">Subject</TableHead>
-              <TableHead className="font-semibold text-foreground">Zone</TableHead>
-              <TableHead className="font-semibold text-foreground">Date</TableHead>
-              <TableHead className="font-semibold text-foreground text-right pr-6">Action</TableHead>
+              <TableHead className="font-semibold text-foreground pl-6">
+                User
+              </TableHead>
+              <TableHead className="font-semibold text-foreground">
+                Subject
+              </TableHead>
+              <TableHead className="font-semibold text-foreground">
+                Zone
+              </TableHead>
+              <TableHead className="font-semibold text-foreground">
+                Date
+              </TableHead>
+              <TableHead className="font-semibold text-foreground text-right pr-6">
+                Action
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {notifications.length > 0 ? (
               notifications.map((notif) => (
-                <TableRow 
-                  key={notif.id} 
+                <TableRow
+                  key={notif.id}
                   className="group hover:bg-muted/50 transition border-border"
                 >
                   <TableCell className="font-medium pl-6">
@@ -101,16 +112,22 @@ export default function Notifications() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      notif.plan.includes("Trial") 
-                        ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300"
-                        : "bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300"
-                    }`}>
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        notif.plan.includes("Trial")
+                          ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300"
+                          : "bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300"
+                      }`}
+                    >
                       {notif.plan}
                     </span>
                   </TableCell>
-                  <TableCell className="text-muted-foreground">{notif.location}</TableCell>
-                  <TableCell className="text-muted-foreground">{notif.date}</TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {notif.location}
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {notif.date}
+                  </TableCell>
                   <TableCell className="text-right pr-6">
                     <Button
                       variant="ghost"
@@ -144,7 +161,9 @@ export default function Notifications() {
                         <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
                       </svg>
                     </div>
-                    <h3 className="font-medium text-lg mb-1">No notifications</h3>
+                    <h3 className="font-medium text-lg mb-1">
+                      No notifications
+                    </h3>
                     <p className="text-sm text-muted-foreground max-w-md">
                       When new notifications arrive, they will appear here.
                     </p>

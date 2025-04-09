@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { 
-  collection, 
-  query, 
-  onSnapshot, 
-  doc, 
-  updateDoc 
+import {
+  collection,
+  query,
+  onSnapshot,
+  doc,
+  updateDoc,
 } from "firebase/firestore";
 import { db } from "@/app/firebase/config";
 
@@ -28,7 +28,7 @@ export const useFetchUsers = () => {
 
   useEffect(() => {
     const usersQuery = query(collection(db, "users"));
-    
+
     const unsubscribe = onSnapshot(
       usersQuery,
       (snapshot) => {
@@ -36,7 +36,7 @@ export const useFetchUsers = () => {
           id: doc.id,
           ...doc.data(),
         })) as User[];
-        
+
         setUsers(usersData);
         setLoading(false);
       },
@@ -55,20 +55,50 @@ export const useFetchUsers = () => {
 };
 
 // Function to update user status
-export const updateUserStatus = async (userId: string, currentStatus: boolean) => {
+export const updateUserStatus = async (
+  userId: string,
+  currentStatus: boolean
+) => {
   try {
     const userRef = doc(db, "users", userId);
     await updateDoc(userRef, {
       isActive: !currentStatus, // Toggles the current status
-      updatedAt: new Date().toISOString() // Optional: track when status was updated
+      updatedAt: new Date().toISOString(), // Optional: track when status was updated
     });
     return { success: true, message: "User status updated successfully" };
   } catch (error) {
     console.error("Error updating user status:", error);
-    return { 
-      success: false, 
-      message: error instanceof Error ? error.message : "Failed to update status" 
+    return {
+      success: false,
+      message:
+        error instanceof Error ? error.message : "Failed to update status",
     };
   }
 };
 
+export const updateUserData = async (
+  userId: string,
+  email: string,
+  username: string,
+  currentStatus: boolean,
+  reason: string,
+) => {
+  try {
+    const userRef = doc(db, "users", userId);
+    await updateDoc(userRef, {
+      isActive: currentStatus,
+      updatedAt: new Date().toISOString(),
+      email: email,
+      username: username,
+      reason: reason,
+    });
+    return { success: true, message: "User status updated successfully" };
+  } catch (error) {
+    console.error("Error updating user status:", error);
+    return {
+      success: false,
+      message:
+        error instanceof Error ? error.message : "Failed to update status",
+    };
+  }
+};

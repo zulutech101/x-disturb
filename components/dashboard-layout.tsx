@@ -31,7 +31,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         {/* Main content */}
         <div className="flex flex-col flex-1 overflow-hidden">
           <Header />
-          <SidebarInset className="flex-1 overflow-y-auto p-8 scrollbar-hide">
+          <SidebarInset className="flex-1 overflow-y-auto p-4 md:p-8 scrollbar-hide">
             {children}
           </SidebarInset>
         </div>
