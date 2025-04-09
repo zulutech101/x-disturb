@@ -9,9 +9,9 @@ import {
   Users,
   FileText,
   Receipt,
-  HelpCircle,
   ChevronLeft,
   ChevronRight,
+  LogOut,
 } from "lucide-react";
 import {
   Sidebar,
@@ -21,7 +21,9 @@ import {
   useSidebar,
 } from "../ui/sidebar";
 import { cn } from "@/lib/utils";
-import Image from "next/image";
+import { auth } from "@/app/firebase/config";
+import { session } from "@/lib/sessionStorage";
+import { signOut } from "firebase/auth";
 
 const sidebarRoutes = [
   { label: "Dashboard", icon: Home, path: "/dashboard" },
@@ -59,22 +61,9 @@ export default function AppSidebar() {
             </h1>
           </div>
         ) : (
-          <Link
-          href="/dashboard"
-          className="flex flex-col items-center justify-center gap-1 bg-white p-2 rounded"
-        >
-          <Image
-            src="/logo.svg"
-            alt="x-disturb logo"
-            width={100}
-            height={32}
-            className="h-8 w-auto"
-          />
-          <span className="text-sm font-medium w-full flex justify-start pl-2" style={{ color: "#E66641" }}>
-            Admin Portal
-          </span>
-        </Link>
-        
+          <h1 className="text-lg italic font-bold tracking-wide text-white">
+            x-disturb
+          </h1>
         )}
 
         {/* Toggle Button */}
@@ -117,16 +106,21 @@ export default function AppSidebar() {
 
       {/* Footer */}
       <SidebarFooter className="mt-auto pt-4">
-        <Link
-          href="/help-center"
+        <button
+          onClick={() => {
+            signOut(auth);
+            session.clear();
+          }}
           className={cn(
-            "flex items-center gap-2 text-sm hover:underline",
-            state === "collapsed" && "justify-center"
+            "flex items-center gap-2 text-white text-sm px-2 py-2 rounded-md bg-[#E66641] hover:bg-[#c4502f] transition",
+            state === "collapsed" && "justify-center px-2"
           )}
         >
-          <HelpCircle size={16} />
-          {state !== "collapsed" && <span>Help Center</span>}
-        </Link>
+          <span className="p-1 bg-white rounded-md">
+            <LogOut className="h-4 w-4 text-[#E66641]" />
+          </span>
+          {state !== "collapsed" && <span>Log out</span>}
+        </button>
       </SidebarFooter>
     </Sidebar>
   );
