@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 
-import { Edit, LoaderCircle, Trash2 } from "lucide-react";
+import { Edit, Trash2 } from "lucide-react";
 import Link from "next/link";
 import {
   collection,
@@ -23,6 +23,7 @@ import { db } from "@/app/firebase/config";
 import { useEffect, useState } from "react";
 import { ConfirmRemovalDialog } from "./ConfirmRemove";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface SilentZone {
   name: string;
@@ -42,7 +43,35 @@ export default function SilentZones() {
   const [loading, setLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
   const [zoneToRemove, setZoneToRemove] = useState<string | null>(null);
-
+  const skeletonRows = Array.from({ length: 5 }).map((_, idx) => (
+    <TableRow key={`skeleton-${idx}`}>
+      <TableCell className="px-6 py-4">
+        <Skeleton className="h-4 w-32 rounded-md" />
+      </TableCell>
+      <TableCell className="px-6 py-4">
+        <Skeleton className="h-4 w-20 rounded-md" />
+      </TableCell>
+      <TableCell className="px-6 py-4">
+        <Skeleton className="h-4 w-16 rounded-md" />
+      </TableCell>
+      <TableCell className="px-6 py-4">
+        <Skeleton className="h-4 w-40 rounded-md" />
+      </TableCell>
+      <TableCell className="px-6 py-4">
+        <Skeleton className="h-6 w-16 rounded-full" />
+      </TableCell>
+      <TableCell className="px-6 py-4">
+        <Skeleton className="h-4 w-48 rounded-md" />
+      </TableCell>
+      <TableCell className="px-6 py-4 text-center">
+        <div className="flex justify-center gap-2">
+          <Skeleton className="h-8 w-8 rounded-full" />
+          <Skeleton className="h-8 w-8 rounded-full" />
+        </div>
+      </TableCell>
+    </TableRow>
+  ));
+  
   useEffect(() => {
     const silentZonesQuery = query(collection(db, "silent_zones"));
     const unsubscribe = onSnapshot(
@@ -105,18 +134,7 @@ export default function SilentZones() {
           </TableRow>
         </TableHeader>
         <TableBody className="bg-white divide-y divide-gray-100">
-          {loading ? (
-            <TableRow>
-              <TableCell colSpan={7}>
-                <div className="h-[50vh] flex items-center justify-center">
-                  <LoaderCircle
-                    className="animate-spin text-primary"
-                    size={60}
-                  />
-                </div>
-              </TableCell>
-            </TableRow>
-          ) : silentZones && silentZones.length > 0 ? (
+          {loading ? skeletonRows : silentZones && silentZones.length > 0 ? (
             silentZones.map((zone) => (
               <TableRow
                 key={zone.id}
