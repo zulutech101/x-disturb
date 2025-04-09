@@ -1,10 +1,10 @@
 import {  useState } from "react"
 import { Button } from "@/components/ui/button"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-
+import * as XLSX from "xlsx"
+import { saveAs } from "file-saver"
 // Define allowed status types
 type StatusType = "Completed" | "Pending" | "Failed"
-
 // Define transaction type
 type Transaction = {
   date: string
@@ -33,7 +33,6 @@ const statusBadgeStyle: Record<StatusType, string> = {
 }
 
 export default function GeofenceTable() {
-
   const itemsPerPage = 5
   const [currentPage, setCurrentPage] = useState(1)
   const totalPages = Math.ceil(allTransactions.length / itemsPerPage)
@@ -43,19 +42,23 @@ export default function GeofenceTable() {
     currentPage * itemsPerPage
   )
 
-  const handleNext = () => {
-    setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-  }
+  const handleNext = () => setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+  const handlePrev = () => setCurrentPage((prev) => Math.max(prev - 1, 1))
 
-  const handlePrev = () => {
-    setCurrentPage((prev) => Math.max(prev - 1, 1))
+  const handleExport = () => {
+    const worksheet = XLSX.utils.json_to_sheet(allTransactions)
+    const workbook = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Transactions")
+    const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" })
+    const fileBlob = new Blob([excelBuffer], { type: "application/octet-stream" })
+    saveAs(fileBlob, "geofence-transactions.xlsx")
   }
 
   return (
     <div className="space-y-6">
       <h2 className="text-lg font-bold">Top Performing Geofences</h2>
 
-      <div  className="rounded-xl border p-4 overflow-x-auto">
+      <div className="rounded-xl border p-4 overflow-x-auto">
         <table className="w-full text-sm text-left">
           <thead>
             <tr className="text-muted-foreground">
@@ -85,7 +88,11 @@ export default function GeofenceTable() {
       </div>
 
       <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-        <Button  variant="outline" className="bg-muted text-red-500 hover:text-red-600">
+        <Button
+          onClick={handleExport}
+          variant="outline"
+          className="bg-muted text-red-500 hover:text-red-600"
+        >
           Export Report
         </Button>
 
@@ -96,7 +103,12 @@ export default function GeofenceTable() {
           <span className="text-sm">
             Page {currentPage} of {totalPages}
           </span>
-          <Button onClick={handleNext} disabled={currentPage === totalPages} size="icon" variant="ghost">
+          <Button
+            onClick={handleNext}
+            disabled={currentPage === totalPages}
+            size="icon"
+            variant="ghost"
+          >
             <ChevronRight className="w-4 h-4" />
           </Button>
         </div>
@@ -104,3 +116,4 @@ export default function GeofenceTable() {
     </div>
   )
 }
+

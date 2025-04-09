@@ -9,9 +9,9 @@ import {
   Users,
   FileText,
   Receipt,
-  HelpCircle,
   ChevronLeft,
   ChevronRight,
+  LogOut,
 } from "lucide-react";
 import {
   Sidebar,
@@ -21,6 +21,9 @@ import {
   useSidebar,
 } from "../ui/sidebar";
 import { cn } from "@/lib/utils";
+import { auth } from "@/app/firebase/config";
+import { session } from "@/lib/sessionStorage";
+import { signOut } from "firebase/auth";
 
 const sidebarRoutes = [
   { label: "Dashboard", icon: Home, path: "/dashboard" },
@@ -53,11 +56,10 @@ export default function AppSidebar() {
       <SidebarHeader className="relative mb-4 px-2">
         {isCollapsed ? (
           <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow cursor-pointer hover:scale-110 transition-transform">
-          <h1 className="text-lg font-black bg-gradient-to-r from-[#E66641] to-[#F2A58E] bg-clip-text text-transparent select-none">
-            X
-          </h1>
-        </div>
-        
+            <h1 className="text-lg font-black bg-gradient-to-r from-[#E66641] to-[#F2A58E] bg-clip-text text-transparent select-none">
+              X
+            </h1>
+          </div>
         ) : (
           <h1 className="text-lg italic font-bold tracking-wide text-white">
             x-disturb
@@ -104,16 +106,21 @@ export default function AppSidebar() {
 
       {/* Footer */}
       <SidebarFooter className="mt-auto pt-4">
-        <Link
-          href="/help-center"
+        <button
+          onClick={() => {
+            signOut(auth);
+            session.clear();
+          }}
           className={cn(
-            "flex items-center gap-2 text-sm hover:underline",
-            state === "collapsed" && "justify-center"
+            "flex items-center gap-2 text-white text-sm px-2 py-2 rounded-md bg-[#E66641] hover:bg-[#c4502f] transition",
+            state === "collapsed" && "justify-center px-2"
           )}
         >
-          <HelpCircle size={16} />
-          {state !== "collapsed" && <span>Help Center</span>}
-        </Link>
+          <span className="p-1 bg-white rounded-md">
+            <LogOut className="h-4 w-4 text-[#E66641]" />
+          </span>
+          {state !== "collapsed" && <span>Log out</span>}
+        </button>
       </SidebarFooter>
     </Sidebar>
   );

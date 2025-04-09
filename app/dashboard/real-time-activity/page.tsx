@@ -23,39 +23,7 @@ import {
 } from "@/components/ui/table";
 import HereMap from "@/components/dashboard/silent-zones/HereMap";
 import Image from "next/image";
-
-const dummyData = [
-  {
-    user: "Abel Tadesse",
-    zone: "Downtown Business District",
-    activity: "Entered Zone",
-    timestamp: "10:15 AM",
-  },
-  {
-    user: "Mahi Abebe",
-    zone: "Residential Area Alpha",
-    activity: "Exited Zone",
-    timestamp: "10:22 AM",
-  },
-  {
-    user: "Biniam Mekonnen",
-    zone: "Commercial Zone B",
-    activity: "Entered Zone",
-    timestamp: "10:30 AM",
-  },
-  {
-    user: "Hanna Fikre",
-    zone: "Downtown Business District",
-    activity: "Inside Zone",
-    timestamp: "10:45 AM",
-  },
-  {
-    user: "Samuel Getachew",
-    zone: "Residential Area Alpha",
-    activity: "Exited Zone",
-    timestamp: "11:00 AM",
-  },
-];
+import { useZoneActivities } from "@/hooks/useZoneActivities";
 
 interface Filters {
   insideZones: boolean;
@@ -74,6 +42,10 @@ const Page = () => {
     lng: 0,
   });
 
+  const activities = useZoneActivities();
+  const recentUniqueUsers = Array.from(
+    new Map(activities.map((a) => [a.userID, a])).values()
+  ).slice(0, 3);
   const handleChange = (filter: keyof Filters) => {
     setFilters((prev) => ({ ...prev, [filter]: !prev[filter] }));
   };
@@ -163,23 +135,18 @@ const Page = () => {
           <div>
             <h3 className="text-xl font-semibold">User Activity</h3>
             <div className="space-y-4 mt-4">
-              {/* User Cards */}
-              {[
-                { name: "Daniel Kebede", zone: "Downtown Business District" },
-                { name: "Belay Meles", zone: "Downtown Business District" },
-                { name: "Yordanos Bekele", zone: "Downtown Business District" },
-              ].map((user, index) => (
-                <div key={index} className="flex items-center space-x-4">
+              {recentUniqueUsers.map((user, index) => (
+                <div key={user.userID} className="flex items-center space-x-4">
                   <Image
                     width={48}
                     height={48}
-                    src={`/U${index + 1}.png`}
+                    src={`/U${index + 1}.png`} // or fallback
                     alt="User avatar"
                     className="w-12 h-12 rounded-full object-cover"
                   />
                   <div>
-                    <p className="font-medium">{`User: ${user.name}`}</p>
-                    <p className="text-sm text-gray-500">{`Entered Zone: ${user.zone}`}</p>
+                    <p className="font-medium">{`User: ${user.userName}`}</p>
+                    <p className="text-sm text-gray-500">{`${user.activity} in: ${user.zoneName}`}</p>
                   </div>
                 </div>
               ))}
@@ -218,25 +185,21 @@ const Page = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {dummyData.map((user) => (
-                //   onClick={()=>router.push(`users-management/${user.id}`)}
+              {activities.map((user) => (
                 <TableRow
-                  key={user.user}
+                  key={user.id}
                   className="border-b border-gray-400 dark:border-gray-600 cursor-pointer"
                 >
-                  {/* <Link href={`dashboard/users-management/${user.id}`}> */}
                   <TableCell className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-100">
-                    {user.user}
+                    {user.userName}
                   </TableCell>
                   <TableCell className="px-6 py-4 text-sm text-gray-500  dark:text-gray-200">
-                    {user.zone}
+                    {user.zoneName}
                   </TableCell>
                   <TableCell className="flex items-center gap-4 px-6 py-4 text-sm ">
                     {user.activity}
                   </TableCell>
-
                   <TableCell>{user.timestamp}</TableCell>
-                  {/* </Link> */}
                 </TableRow>
               ))}
             </TableBody>
