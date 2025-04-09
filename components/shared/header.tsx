@@ -72,28 +72,29 @@ export const Header = () => {
     <header className="border-b border-gray-200 flex justify-end">
       <div className="container px-4 py-4 flex justify-end items-center">
         <div className="flex items-center gap-4">
-         <NotificationPanel/>
+          <NotificationPanel />
 
           <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
             <DropdownMenuTrigger className="flex items-center gap-2 outline-none">
               {loading || fetchLoading ? (
                 <div className="flex items-center gap-3">
-                <Skeleton className="h-10  bg-[#E66641]/20 w-10 rounded-full" />
-                <div className="hidden md:block space-y-2">
-                  <Skeleton className="h-4 w-28 bg-[#E66641]/20 rounded-md" />
-                  <Skeleton className="h-3 w-20 bg-[#E66641]/20 rounded-md" />
+                  <Skeleton className="h-10  bg-[#E66641]/20 w-10 rounded-full" />
+                  <div className="hidden md:block space-y-2">
+                    <Skeleton className="h-4 w-28 bg-[#E66641]/20 rounded-md" />
+                    <Skeleton className="h-3 w-20 bg-[#E66641]/20 rounded-md" />
+                  </div>
                 </div>
-              </div>
               ) : (
                 <div className="flex items-center gap-3">
                   <Avatar>
                     <AvatarFallback className="bg-orange-500 text-white">
-                      {profileData?.username[0]?.toUpperCase()}
+                      {profileData?.firstName[0]?.toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <div className="hidden md:block text-left">
                     <div className="font-medium capitalize">
-                      {profileData?.username}
+                      {profileData?.lastName[0]?.toUpperCase()}.{" "}
+                      {profileData?.firstName}
                     </div>
                     <div className="text-xs text-gray-500">Administrator</div>
                   </div>
