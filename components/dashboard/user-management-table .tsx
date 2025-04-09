@@ -15,7 +15,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import { Trash2, LoaderCircle, Edit } from "lucide-react";
+import { Trash2, Edit } from "lucide-react";
 import { User } from "@/app/api/user-management-api";
 import Link from "next/link";
 // import { useRouter } from "next/navigation";
@@ -53,16 +53,27 @@ const UserManagementTable = ({
         </TableHeader>
         <TableBody>
           {isLoading ? (
-            <TableRow>
-              <TableCell colSpan={7}>
-                <div className="h-[50vh] flex items-center justify-center">
-                  <LoaderCircle
-                    className="animate-spin text-primary"
-                    size={60}
-                  />
-                </div>
-              </TableCell>
-            </TableRow>
+            <>
+              {Array.from({ length: 5 }).map((_, i) => (
+                <TableRow key={`skeleton-user-${i}`} className="animate-pulse">
+                  <TableCell className="px-6 py-4">
+                    <div className="h-4 w-32 bg-[#f9d3c4] dark:bg-[#b54c2f]/20 rounded-md" />
+                  </TableCell>
+                  <TableCell className="px-6 py-4">
+                    <div className="h-4 w-48 bg-[#f9d3c4] dark:bg-[#b54c2f]/20 rounded-md" />
+                  </TableCell>
+                  <TableCell className="px-6 py-4">
+                    <div className="flex gap-2">
+                      <div className="w-8 h-8 rounded-full bg-[#f9d3c4] dark:bg-[#b54c2f]/20" />
+                      <div className="w-8 h-8 rounded-full bg-[#f9d3c4] dark:bg-[#b54c2f]/20" />
+                    </div>
+                  </TableCell>
+                  <TableCell className="px-6 py-4">
+                    <div className="h-6 w-20 bg-[#f9d3c4] dark:bg-[#b54c2f]/20 rounded-full" />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </>
           ) : users && users.length > 0 ? (
             <>
               {users.map((user) => (

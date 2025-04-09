@@ -42,7 +42,7 @@ const Page = () => {
     lng: 0,
   });
 
-  const activities = useZoneActivities();
+  const { activities, loading } = useZoneActivities();
   const recentUniqueUsers = Array.from(
     new Map(activities.map((a) => [a.userID, a])).values()
   ).slice(0, 3);
@@ -135,21 +135,34 @@ const Page = () => {
           <div>
             <h3 className="text-xl font-semibold">User Activity</h3>
             <div className="space-y-4 mt-4">
-              {recentUniqueUsers.map((user, index) => (
-                <div key={user.userID} className="flex items-center space-x-4">
-                  <Image
-                    width={48}
-                    height={48}
-                    src={`/U${index + 1}.png`} // or fallback
-                    alt="User avatar"
-                    className="w-12 h-12 rounded-full object-cover"
-                  />
-                  <div>
-                    <p className="font-medium">{`User: ${user.userName}`}</p>
-                    <p className="text-sm text-gray-500">{`${user.activity} in: ${user.zoneName}`}</p>
-                  </div>
-                </div>
-              ))}
+              {loading
+                ? Array.from({ length: 3 }).map((_, index) => (
+                    <div key={index} className="flex items-center space-x-4">
+                      <div className="w-12 h-12 rounded-full  bg-[#f9d3c4] dark:bg-[#b54c2f]/20animate-pulse" />
+                      <div className="space-y-2">
+                        <div className="h-4 w-32  bg-[#f9d3c4] dark:bg-[#b54c2f]/20rounded animate-pulse" />
+                        <div className="h-3 w-48 bg-gray-200 dark:bg-gray-600 rounded animate-pulse" />
+                      </div>
+                    </div>
+                  ))
+                : recentUniqueUsers.map((user, index) => (
+                    <div
+                      key={user.userID}
+                      className="flex items-center space-x-4"
+                    >
+                      <Image
+                        width={48}
+                        height={48}
+                        src={`/U${index + 1}.png`}
+                        alt="User avatar"
+                        className="w-12 h-12 rounded-full object-cover"
+                      />
+                      <div>
+                        <p className="font-medium">{`User: ${user.userName}`}</p>
+                        <p className="text-sm text-gray-500">{`${user.activity} in: ${user.zoneName}`}</p>
+                      </div>
+                    </div>
+                  ))}
             </div>
           </div>
         </div>
@@ -185,23 +198,40 @@ const Page = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {activities.map((user) => (
-                <TableRow
-                  key={user.id}
-                  className="border-b border-gray-400 dark:border-gray-600 cursor-pointer"
-                >
-                  <TableCell className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-100">
-                    {user.userName}
-                  </TableCell>
-                  <TableCell className="px-6 py-4 text-sm text-gray-500  dark:text-gray-200">
-                    {user.zoneName}
-                  </TableCell>
-                  <TableCell className="flex items-center gap-4 px-6 py-4 text-sm ">
-                    {user.activity}
-                  </TableCell>
-                  <TableCell>{user.timestamp}</TableCell>
-                </TableRow>
-              ))}
+              {loading
+                ? Array.from({ length: 5 }).map((_, i) => (
+                    <TableRow key={`skeleton-row-${i}`}>
+                      <TableCell className="px-6 py-4">
+                        <div className="h-4 w-32 rounded  bg-[#f9d3c4] dark:bg-[#b54c2f]/20 animate-pulse" />
+                      </TableCell>
+                      <TableCell className="px-6 py-4">
+                        <div className="h-4 w-28 rounded  bg-[#f9d3c4] dark:bg-[#b54c2f]/20animate-pulse" />
+                      </TableCell>
+                      <TableCell className="px-6 py-4">
+                        <div className="h-4 w-24 rounded  bg-[#f9d3c4] dark:bg-[#b54c2f]/20animate-pulse" />
+                      </TableCell>
+                      <TableCell className="px-6 py-4">
+                        <div className="h-4 w-20 rounded  bg-[#f9d3c4] dark:bg-[#b54c2f]/20animate-pulse" />
+                      </TableCell>
+                    </TableRow>
+                  ))
+                : activities.map((user) => (
+                    <TableRow
+                      key={user.id}
+                      className="border-b border-gray-400 dark:border-gray-600 cursor-pointer"
+                    >
+                      <TableCell className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-100">
+                        {user.userName}
+                      </TableCell>
+                      <TableCell className="px-6 py-4 text-sm text-gray-500 dark:text-gray-200">
+                        {user.zoneName}
+                      </TableCell>
+                      <TableCell className="flex items-center gap-4 px-6 py-4 text-sm">
+                        {user.activity}
+                      </TableCell>
+                      <TableCell>{user.timestamp}</TableCell>
+                    </TableRow>
+                  ))}
             </TableBody>
           </Table>
         </div>
