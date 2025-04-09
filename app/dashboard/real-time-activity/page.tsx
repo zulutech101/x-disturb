@@ -36,11 +36,11 @@ const Page = () => {
     outsideZones: false,
   });
 
-  // eslint-disable-next-line  @typescript-eslint/no-unused-vars
   const [coordinates, setCoordinates] = useState({
     lat: 0,
     lng: 0,
   });
+  console.log(coordinates)
 
   const { activities, loading } = useZoneActivities();
   const recentUniqueUsers = Array.from(
