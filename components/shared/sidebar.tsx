@@ -21,6 +21,7 @@ import {
   useSidebar,
 } from "../ui/sidebar";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 const sidebarRoutes = [
   { label: "Dashboard", icon: Home, path: "/dashboard" },
@@ -53,15 +54,27 @@ export default function AppSidebar() {
       <SidebarHeader className="relative mb-4 px-2">
         {isCollapsed ? (
           <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow cursor-pointer hover:scale-110 transition-transform">
-          <h1 className="text-lg font-black bg-gradient-to-r from-[#E66641] to-[#F2A58E] bg-clip-text text-transparent select-none">
-            X
-          </h1>
-        </div>
-        
+            <h1 className="text-lg font-black bg-gradient-to-r from-[#E66641] to-[#F2A58E] bg-clip-text text-transparent select-none">
+              X
+            </h1>
+          </div>
         ) : (
-          <h1 className="text-lg italic font-bold tracking-wide text-white">
-            x-disturb
-          </h1>
+          <Link
+          href="/dashboard"
+          className="flex flex-col items-center justify-center gap-1 bg-white p-2 rounded"
+        >
+          <Image
+            src="/logo.svg"
+            alt="x-disturb logo"
+            width={100}
+            height={32}
+            className="h-8 w-auto"
+          />
+          <span className="text-sm font-medium w-full flex justify-start pl-2" style={{ color: "#E66641" }}>
+            Admin Portal
+          </span>
+        </Link>
+        
         )}
 
         {/* Toggle Button */}

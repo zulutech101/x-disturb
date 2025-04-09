@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Bell } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -18,11 +17,13 @@ import { Skeleton } from "../ui/skeleton";
 
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/app/firebase/config";
+import NotificationPanel from "../dashboard/notification/notification-panel";
 
 export const Header = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const router = useRouter();
 
+  /* eslint-disable */
   const [profileData, setProfileData] = useState<any>(null);
   const [fetchLoading, setFetchLoading] = useState(true);
 
@@ -31,11 +32,11 @@ export const Header = () => {
     session.clear();
   };
 
-  let id = session?.getItem("userId") || "admin_id";
+  const id = session?.getItem("userId") || "admin_id";
 
   const { user, loading } = useAuthChecker();
   const username = user?.email?.split("@")[0] ?? "";
-  let capitalizedInitials = username
+  const capitalizedInitials = username
     ? username
         .split(".")
         .map((word) => word[0]?.toUpperCase() ?? "")
@@ -67,12 +68,7 @@ export const Header = () => {
     <header className="border-b border-gray-200 flex justify-end">
       <div className="container px-4 py-4 flex justify-end items-center">
         <div className="flex items-center gap-4">
-          <button
-            onClick={() => router.push("/dashboard/notification")}
-            className="p-2 relative cursor-pointer"
-          >
-            <Bell className="h-6 w-6 text-gray-700" />
-          </button>
+         <NotificationPanel/>
 
           <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
             <DropdownMenuTrigger className="flex items-center gap-2 outline-none">
