@@ -17,6 +17,7 @@ declare global {
     H: any;
   }
 }
+
 type HereMapProps = {
   onCoordinatesChange: (coords: { lat: string; lng: string }) => void;
 };

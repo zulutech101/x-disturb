@@ -79,7 +79,7 @@ export default function TransactionTable() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="text-muted-foreground">Date</TableHead>
+              <TableHead className="text-muted-foreground px-4">Date</TableHead>
               <TableHead className="text-muted-foreground">Customer</TableHead>
               <TableHead className="text-muted-foreground">Amount</TableHead>
               <TableHead className="text-muted-foreground">Status</TableHead>
@@ -90,7 +90,7 @@ export default function TransactionTable() {
               ? skeletonRows
               : paginatedData.map((tx, i) => (
                   <TableRow key={i}>
-                    <TableCell>{tx.createdAt}</TableCell>
+                    <TableCell className="px-4">{tx.createdAt}</TableCell>
                     <TableCell className="text-muted-foreground">
                       {tx.customerName}
                     </TableCell>
