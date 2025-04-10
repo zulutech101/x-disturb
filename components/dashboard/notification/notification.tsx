@@ -174,7 +174,7 @@ export default function NotificationsPage() {
 
       {/* Clear All Notifications Alert */}
       <AlertDialog open={showClearAlert} onOpenChange={setShowClearAlert}>
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-white">
           <AlertDialogHeader>
             <AlertDialogTitle>Clear all notifications?</AlertDialogTitle>
             <AlertDialogDescription>
@@ -183,7 +183,7 @@ export default function NotificationsPage() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleClearAll} className="bg-[#E66641] hover:bg-[#C4502F]">
+            <AlertDialogAction onClick={handleClearAll} className="bg-[#E66641] hover:bg-[#C4502F] text-white">
               Clear all
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -201,7 +201,7 @@ export default function NotificationsPage() {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => notificationToDelete && handleDeleteNotification(notificationToDelete)}
-              className="bg-[#E66641] hover:bg-[#C4502F]"
+              className="bg-[#E66641] hover:bg-[#C4502F] text-white"
             >
               Delete
             </AlertDialogAction>
