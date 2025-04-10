@@ -33,6 +33,7 @@ import { db } from "@/app/firebase/config";
 
 import Image from "next/image";
 import { useAdminContext } from "@/components/context-provider";
+import ProfileSkeleton from "@/components/dashboard/profile/ProfileSkeleton";
 
 // Define the Zod schema for form validation
 const profileSchema = z.object({
@@ -70,6 +71,7 @@ const timeZones = [
 
 export default function ProfilePage() {
   const [submitting, setSubmitting] = useState(false);
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { triggerRefetch } = useAdminContext();
 
@@ -83,6 +85,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     const fetchAdminProfile = async () => {
+      setLoading(true);
       try {
         const docRef = doc(db, "admin_profile", id);
         const docSnap = await getDoc(docRef);
@@ -106,6 +109,7 @@ export default function ProfilePage() {
       } catch (err) {
         console.error("Error fetching admin profile:", err);
       }
+      setLoading(false);
     };
 
     fetchAdminProfile();
@@ -133,6 +137,8 @@ export default function ProfilePage() {
     <div className="flex">
       <main className="max-w-4xl">
         <h1 className="text-2xl font-bold mb-6">My profile</h1>
+
+        {loading ? <ProfileSkeleton /> : ""}
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">

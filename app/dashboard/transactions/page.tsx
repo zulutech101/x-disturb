@@ -1,6 +1,6 @@
 "use client";
 import MetricCard from "@/components/dashboard/metric-card";
-import GeofenceTable from "@/components/dashboard/RecentTransactionsTable";
+import TransactionTable from "@/components/dashboard/RecentTransactionsTable";
 import React from "react";
 
 const Page = () => {
@@ -24,7 +24,7 @@ const Page = () => {
           <MetricCard title="Pending Payments" value="25" />
         </div>
       </div>
-      <GeofenceTable />
+      <TransactionTable />
     </div>
   );
 };

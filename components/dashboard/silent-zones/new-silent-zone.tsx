@@ -73,14 +73,7 @@ export default function CreateSilentZone() {
     },
   });
 
-  // const fetchSessionData = async () => {
-  //   const userId = await session.getItem("userId");
-  //   form.setValue("adminID", userId || "admin_user");
-  // };
-
-  console.log("form values admin ID", session.getItem("userId"));
-
-  console.log("form", form.getValues());
+  const radius = form.watch("radius");
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     console.log({ values });
@@ -211,6 +204,7 @@ export default function CreateSilentZone() {
           {/* Map Component */}
 
           <HereMap
+            radius={radius}
             onCoordinatesChange={(coords) => {
               form.setValue("center.latitude", coords.lat);
               form.setValue("center.longitude", coords.lng);
