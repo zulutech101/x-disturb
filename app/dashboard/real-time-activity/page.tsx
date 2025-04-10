@@ -47,7 +47,6 @@ const Page = () => {
     outsideZones: false,
   });
 
-  // eslint-disable-next-line  @typescript-eslint/no-unused-vars
   const [coordinates, setCoordinates] = useState({ lat: 9.0572, lng: 38.7592 });
   const [radius, setRadius] = useState(500);
   const { silentZones } = useSilentZones();
