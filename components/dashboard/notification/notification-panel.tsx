@@ -191,7 +191,7 @@ export default function NotificationPanel() {
                 Mark all as read
               </Button>
               <Link
-                href="dashboard/notifications"
+                href="/dashboard/notifications"
                 className="text-sm text-[#E66641] hover:text-[#C4502F] hover:underline flex items-center"
                 onClick={() => setIsOpen(false)}
               >

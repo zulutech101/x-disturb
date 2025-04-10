@@ -20,18 +20,18 @@ import { db } from "@/app/firebase/config";
 import { useParams } from "next/navigation";
 import { Switch } from "@/components/ui/switch";
 
-export const formSchema = z.object({
-  email: z.string().email(),
-  username: z.string().min(4, { message: "" }),
-  reason: z.string(),
-  currentStatus: z.boolean(),
-});
+
 
 const UserDetailPage = () => {
   const [isUpdating, setIsUpdating] = useState(false);
   const params = useParams();
   const userId = params.id as string;
-
+   const formSchema = z.object({
+    email: z.string().email(),
+    username: z.string().min(4, { message: "" }),
+    reason: z.string(),
+    currentStatus: z.boolean(),
+  });
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });

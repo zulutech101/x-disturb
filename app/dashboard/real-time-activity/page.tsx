@@ -47,7 +47,6 @@ const Page = () => {
     outsideZones: false,
   });
 
-  // eslint-disable-next-line  @typescript-eslint/no-unused-vars
   const [coordinates, setCoordinates] = useState({ lat: 9.0572, lng: 38.7592 });
   const [radius, setRadius] = useState(500);
   const { silentZones } = useSilentZones();
@@ -101,7 +100,7 @@ const Page = () => {
         <div className=" space-y-2">
           <p className="text-xl font-bold  text-gray-900">Zone selection</p>
           <Select
-            defaultValue="Dembel City Center"
+            // defaultValue="Dembel City Center"
             onValueChange={handleZoneChange}
           >
             <SelectTrigger className="w-full p-3 bg-white border border-gray-300 rounded-md cursor-pointer">
