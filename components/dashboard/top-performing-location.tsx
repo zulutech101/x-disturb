@@ -41,7 +41,7 @@ const libraryData: LibraryData[] = Array(4).fill({
 export default function TopPerformingLocation() {
   return (
     <div className="w-full mx-auto mb-10">
-      <h1 className="text-2xl font-bold mb-4">Top Performing Location</h1>
+      <h1 className="text-2xl font-bold mb-4">Most Active Location</h1>
       <div className="border rounded-lg overflow-hidden">
         <Table>
           <TableHeader>

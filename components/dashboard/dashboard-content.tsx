@@ -4,8 +4,8 @@ import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import DashboardCharts from "./dashboard-charts";
-import TopPerformingLocation from "./top-performing-location";
 import MetricCard from "./metric-card";
+import TopPerformingLocation from "./top-performing-location";
 
 export function DashboardContent() {
   return (
@@ -71,4 +71,3 @@ export function DashboardContent() {
     </div>
   );
 }
-

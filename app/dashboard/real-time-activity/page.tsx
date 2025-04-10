@@ -21,13 +21,24 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import HereMap from "@/components/dashboard/silent-zones/HereMap";
+// import HereMap from "@/components/dashboard/silent-zones/HereMap";
 import Image from "next/image";
 import { useZoneActivities } from "@/hooks/useZoneActivities";
+import ActivityMap from "@/components/real-time-activity/ActivityMap";
+import { SilentZone, useSilentZones } from "@/hooks/useSilentZones";
 
 interface Filters {
   insideZones: boolean;
   outsideZones: boolean;
+}
+
+interface SimplifiedZone {
+  name: string;
+  coord: {
+    lat: number;
+    lng: number;
+  };
+  radius: number;
 }
 
 const Page = () => {
@@ -36,21 +47,47 @@ const Page = () => {
     outsideZones: false,
   });
 
-  const [coordinates, setCoordinates] = useState({
-    lat: 0,
-    lng: 0,
-  });
-  console.log(coordinates)
+  // eslint-disable-next-line  @typescript-eslint/no-unused-vars
+  const [coordinates, setCoordinates] = useState({ lat: 9.0572, lng: 38.7592 });
+  const [radius, setRadius] = useState(500);
+  const { silentZones } = useSilentZones();
 
   const { activities, loading } = useZoneActivities();
+
   const recentUniqueUsers = Array.from(
     new Map(activities.map((a) => [a.userID, a])).values()
   ).slice(0, 3);
+
+  function getSimplifiedZones(zones: SilentZone[]): SimplifiedZone[] {
+    return zones.map((zone) => ({
+      name: zone.name,
+      coord: {
+        lat: zone.center.latitude,
+        lng: zone.center.longitude,
+      },
+      radius: zone.radius,
+    }));
+  }
+
+  const simplifiedZones = getSimplifiedZones(silentZones);
+
   const handleChange = (filter: keyof Filters) => {
     setFilters((prev) => ({ ...prev, [filter]: !prev[filter] }));
   };
+
   const handleApplyFilters = () => {
     console.log("Filters applied:", filters);
+  };
+
+  const handleZoneChange = (zoneName: string) => {
+    const selectedZone = simplifiedZones.find((zone) => zone.name === zoneName);
+    if (selectedZone) {
+      setRadius(selectedZone.radius);
+      setCoordinates({
+        lat: selectedZone.coord.lat,
+        lng: selectedZone.coord.lng,
+      });
+    }
   };
 
   return (
@@ -63,29 +100,21 @@ const Page = () => {
 
         <div className=" space-y-2">
           <p className="text-xl font-bold  text-gray-900">Zone selection</p>
-          <Select defaultValue="Dembel City Center">
+          <Select
+            defaultValue="Dembel City Center"
+            onValueChange={handleZoneChange}
+          >
             <SelectTrigger className="w-full p-3 bg-white border border-gray-300 rounded-md cursor-pointer">
               <SelectValue placeholder="Select Location" />
             </SelectTrigger>
             <SelectContent className="bg-white">
-              <SelectItem value="Dembel City Center">
-                Dembel City Center
-              </SelectItem>
-              <SelectItem className="cursor-pointer" value="Edna Mall">
-                Edna Mall
-              </SelectItem>
-              <SelectItem className="cursor-pointer" value="Century Mall">
-                Century Mall
-              </SelectItem>
-              <SelectItem className="cursor-pointer" value="Friendship Park">
-                Friendship Park
-              </SelectItem>
-              <SelectItem className="cursor-pointer" value="Unity Park">
-                Unity Park
-              </SelectItem>
-              <SelectItem className="cursor-pointer" value="Entoto Park">
-                Entoto Park
-              </SelectItem>
+              {simplifiedZones.map((zone, index) => {
+                return (
+                  <SelectItem key={index} value={zone.name}>
+                    {zone.name}
+                  </SelectItem>
+                );
+              })}
             </SelectContent>
           </Select>
         </div>
@@ -168,15 +197,8 @@ const Page = () => {
         </div>
       </div>
       <div className="w-full xl:w-3/4 h-full flex flex-col gap-[10px]">
-        <div className="   rounded-b-md">
-          <HereMap
-            onCoordinatesChange={(coords) => {
-              setCoordinates({
-                lat: parseFloat(coords.lat),
-                lng: parseFloat(coords.lng),
-              });
-            }}
-          ></HereMap>
+        <div className="rounded-b-md">
+          <ActivityMap coords={coordinates} radius={radius} />
         </div>
         <p className="text-gray-950 text-xl font-bold">Zone Log Activity</p>
         <div className="rounded-xl border overflow-hidden shadow-sm bg-background">
@@ -229,7 +251,9 @@ const Page = () => {
                       <TableCell className="flex items-center gap-4 px-6 py-4 text-sm">
                         {user.activity}
                       </TableCell>
-                      <TableCell>{user.timestamp}</TableCell>
+                      <TableCell className="px-6 py-4 text-sm text-gray-900 dark:text-gray-200">
+                        {user.timestamp}
+                      </TableCell>
                     </TableRow>
                   ))}
             </TableBody>

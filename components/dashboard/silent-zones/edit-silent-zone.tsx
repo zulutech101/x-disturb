@@ -84,6 +84,8 @@ export default function UpdateSilentZone() {
     },
   });
 
+  const radius = form.watch("radius");
+
   useEffect(() => {
     if (zoneData && !loading) {
       form.reset({
@@ -230,6 +232,7 @@ export default function UpdateSilentZone() {
 
           {/* <MapPlace /> */}
           <HereMap
+            radius={radius}
             onCoordinatesChange={(coords) => {
               form.setValue("center.latitude", coords.lat);
               form.setValue("center.longitude", coords.lng);
