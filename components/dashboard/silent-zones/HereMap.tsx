@@ -4,7 +4,6 @@ import type React from "react";
 
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-// import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, MapPin, Search } from "lucide-react";
@@ -20,8 +19,10 @@ declare global {
 
 type HereMapProps = {
   onCoordinatesChange: (coords: { lat: string; lng: string }) => void;
+  radius: number; // Assuming this is intended to be "radius"
 };
-const HereMap = ({ onCoordinatesChange }: HereMapProps) => {
+
+const HereMap = ({ onCoordinatesChange, radius }: HereMapProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const [coordinates, setCoordinates] = useState<{
     lat: string | null;
@@ -30,6 +31,8 @@ const HereMap = ({ onCoordinatesChange }: HereMapProps) => {
     lat: null,
     lng: null,
   });
+
+  console.log({ radius });
 
   const updateCoordinates = (coord: { lat: string; lng: string }) => {
     setCoordinates(coord);
@@ -41,6 +44,7 @@ const HereMap = ({ onCoordinatesChange }: HereMapProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isMapLoading, setIsMapLoading] = useState<boolean>(true);
   const markersRef = useRef<any[]>([]);
+  const circleRef = useRef<any>(null); // Reference to the circle object
 
   const apikey: string = process.env.NEXT_PUBLIC_HERE_API_KEY || "";
 
@@ -68,7 +72,7 @@ const HereMap = ({ onCoordinatesChange }: HereMapProps) => {
           defaultLayers.vector.normal.map,
           {
             center: { lat: 9.0572, lng: 38.7592 },
-            zoom: 12,
+            zoom: 14,
             pixelRatio: window.devicePixelRatio || 1,
           }
         );
@@ -91,16 +95,35 @@ const HereMap = ({ onCoordinatesChange }: HereMapProps) => {
               lng: coord.lng.toFixed(6),
             });
 
-            // Clear previous markers
+            // Clear previous markers and circle
             if (markersRef.current.length > 0) {
               hereMap.removeObjects(markersRef.current);
               markersRef.current = [];
+            }
+            if (circleRef.current) {
+              hereMap.removeObject(circleRef.current);
+              circleRef.current = null;
             }
 
             // Add marker using raw float values
             const marker = new H.map.Marker(coord);
             hereMap.addObject(marker);
             markersRef.current.push(marker);
+
+            // Add circle centered on the marker
+            const circle = new H.map.Circle(
+              coord,
+              radius, // Use the radius prop (in meters)
+              {
+                style: {
+                  strokeColor: "rgba(255, 0, 0, 0.7)", // Red outline
+                  lineWidth: 2,
+                  fillColor: "rgba(0, 255, 0, 0.3)", // Green fill with transparency
+                },
+              }
+            );
+            hereMap.addObject(circle);
+            circleRef.current = circle;
           }
         });
 
@@ -167,10 +190,17 @@ const HereMap = ({ onCoordinatesChange }: HereMapProps) => {
     };
   }, [apikey]);
 
+  // Update circle radius when radius prop changes
+  useEffect(() => {
+    if (!map || !circleRef.current) return;
+
+    circleRef.current.setRadius(radius); // Update the circle's radius dynamically
+  }, [radius, map]);
+
   // Use direct REST API for geocoding instead of the service API
   const handleSearch = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    e.stopPropagation(); // 🔥 prevent any bubbling weirdness
+    e.stopPropagation(); // Prevent any bubbling weirdness
 
     if (!searchQuery || !map) return;
 
@@ -202,16 +232,35 @@ const HereMap = ({ onCoordinatesChange }: HereMapProps) => {
         map.setCenter({ lat: position.lat, lng: position.lng });
         map.setZoom(14);
 
-        // Clear previous markers
+        // Clear previous markers and circle
         if (markersRef.current.length > 0) {
           map.removeObjects(markersRef.current);
           markersRef.current = [];
+        }
+        if (circleRef.current) {
+          map.removeObject(circleRef.current);
+          circleRef.current = null;
         }
 
         // Add new marker
         const marker = new window.H.map.Marker(position);
         map.addObject(marker);
         markersRef.current.push(marker);
+
+        // Add circle centered on the marker
+        const circle = new window.H.map.Circle(
+          position,
+          radius, // Use the radius prop (in meters)
+          {
+            style: {
+              strokeColor: "rgba(255, 0, 0, 0.7)",
+              lineWidth: 2,
+              fillColor: "rgba(0, 255, 0, 0.3)",
+            },
+          }
+        );
+        map.addObject(circle);
+        circleRef.current = circle;
       } else {
         setError("No results found for your search query.");
       }
@@ -229,15 +278,12 @@ const HereMap = ({ onCoordinatesChange }: HereMapProps) => {
 
   return (
     <Card className="w-full mx-auto shadow-lg">
-      {/* <CardHeader>
-          <CardTitle className="text-center">HERE Maps Explorer</CardTitle>
-        </CardHeader> */}
       <CardContent>
         <div
           onSubmit={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            handleSearch(e as any); // only if you want to reuse the logic, or call handleSearch directly on button click
+            handleSearch(e as any); // Only if you want to reuse the logic, or call handleSearch directly on button click
           }}
           className="flex gap-2 mb-4"
         >

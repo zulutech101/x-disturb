@@ -12,10 +12,10 @@ declare global {
 
 type ActivityMapProps = {
   coords: { lat: number; lng: number };
-  radious: number;
+  radius: number;
 };
 
-const ActivityMap = ({ coords: { lat, lng }, radious }: ActivityMapProps) => {
+const ActivityMap = ({ coords: { lat, lng }, radius }: ActivityMapProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<H.Map | null>(null);
   const markerRef = useRef<H.map.Marker | null>(null);
@@ -91,7 +91,7 @@ const ActivityMap = ({ coords: { lat, lng }, radious }: ActivityMapProps) => {
       mapInstance.current?.addObject(markerRef.current!);
 
       // Add a circle
-      circleRef.current = new H.map.Circle({ lat, lng }, radious, {
+      circleRef.current = new H.map.Circle({ lat, lng }, radius, {
         style: {
           strokeColor: "rgba(255, 0, 0, 0.7)",
           lineWidth: 2,

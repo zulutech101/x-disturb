@@ -38,7 +38,7 @@ interface SimplifiedZone {
     lat: number;
     lng: number;
   };
-  radious: number;
+  radius: number;
 }
 
 const Page = () => {
@@ -49,7 +49,7 @@ const Page = () => {
 
   // eslint-disable-next-line  @typescript-eslint/no-unused-vars
   const [coordinates, setCoordinates] = useState({ lat: 9.0572, lng: 38.7592 });
-  const [radious, setRadious] = useState(500);
+  const [radius, setRadius] = useState(500);
   const { silentZones } = useSilentZones();
 
   const { activities, loading } = useZoneActivities();
@@ -65,7 +65,7 @@ const Page = () => {
         lat: zone.center.latitude,
         lng: zone.center.longitude,
       },
-      radious: zone.radius,
+      radius: zone.radius,
     }));
   }
 
@@ -82,7 +82,7 @@ const Page = () => {
   const handleZoneChange = (zoneName: string) => {
     const selectedZone = simplifiedZones.find((zone) => zone.name === zoneName);
     if (selectedZone) {
-      setRadious(selectedZone.radious);
+      setRadius(selectedZone.radius);
       setCoordinates({
         lat: selectedZone.coord.lat,
         lng: selectedZone.coord.lng,
@@ -198,7 +198,7 @@ const Page = () => {
       </div>
       <div className="w-full xl:w-3/4 h-full flex flex-col gap-[10px]">
         <div className="rounded-b-md">
-          <ActivityMap coords={coordinates} radious={radious} />
+          <ActivityMap coords={coordinates} radius={radius} />
         </div>
         <p className="text-gray-950 text-xl font-bold">Zone Log Activity</p>
         <div className="rounded-xl border overflow-hidden shadow-sm bg-background">
