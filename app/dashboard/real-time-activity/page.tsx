@@ -101,7 +101,7 @@ const Page = () => {
         <div className=" space-y-2">
           <p className="text-xl font-bold  text-gray-900">Zone selection</p>
           <Select
-            defaultValue="Dembel City Center"
+            // defaultValue="Dembel City Center"
             onValueChange={handleZoneChange}
           >
             <SelectTrigger className="w-full p-3 bg-white border border-gray-300 rounded-md cursor-pointer">

@@ -24,7 +24,8 @@ import { cn } from "@/lib/utils";
 import { auth } from "@/app/firebase/config";
 import { session } from "@/lib/sessionStorage";
 import { signOut } from "firebase/auth";
-
+import Image
+ from "next/image";
 const sidebarRoutes = [
   { label: "Dashboard", icon: Home, path: "/dashboard" },
   { label: "Silent Zones", icon: MapPin, path: "/dashboard/silent-zones" },
@@ -53,7 +54,7 @@ export default function AppSidebar() {
       className="h-screen p-4 bg-[#E66641] text-white"
     >
       {/* Sidebar Header */}
-      <SidebarHeader className="relative mb-4 px-2">
+      <SidebarHeader className="relative mb-4  px-2">
         {isCollapsed ? (
           <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow cursor-pointer hover:scale-110 transition-transform">
             <h1 className="text-lg font-black bg-gradient-to-r from-[#E66641] to-[#F2A58E] bg-clip-text text-transparent select-none">
@@ -61,9 +62,18 @@ export default function AppSidebar() {
             </h1>
           </div>
         ) : (
-          <h1 className="text-lg italic font-bold tracking-wide text-white">
-            x-disturb
-          </h1>
+
+          <div className="bg-white rounded p-2 w-fit">
+            <Image
+              src="/logo.svg"
+              alt="x-disturb logo"
+              width={120}  // smaller width
+              height={40} // smaller height
+              className="h-10 w-40 object-contain"
+            />
+          </div>
+          
+        
         )}
 
         {/* Toggle Button */}
