@@ -64,6 +64,13 @@ const monthlyTrendData = [
   { name: "Week 4", xDisturb: 7000, church: 3300, mosque: 2300, library: 1400 },
 ];
 
+const lastMonthlyTrendData = [
+  { name: "Week 2", xDisturb: 7800, church: 3100, mosque: 2600, library: 2100 },
+  { name: "Week 4", xDisturb: 7000, church: 3300, mosque: 2300, library: 1400 },
+  { name: "Week 3", xDisturb: 7600, church: 3300, mosque: 2500, library: 1800 },
+  { name: "Week 1", xDisturb: 7100, church: 2800, mosque: 2400, library: 1900 },
+];
+
 const COLORS = ["#FF6F68", "#0088FE", "#00C49F", "#FFBB28"];
 
 export default function RevenueBreakdown() {
@@ -100,9 +107,10 @@ export default function RevenueBreakdown() {
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-8">
+    <div className="container mx-auto my-10 space-y-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div className="flex items-center gap-2">
+        <div className="w-full flex items-center justify-between gap-2">
+          <h2 className="mb-4 text-xl font-semibold">Revenue Metrics</h2>
           <Select value={timeRange} onValueChange={handleTimeRangeChange}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Select time range" />
@@ -118,7 +126,6 @@ export default function RevenueBreakdown() {
 
       {/* Revenue Metrics Section */}
       <div>
-        <h2 className="text-2xl font-bold mb-4">Revenue Metrics</h2>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <Card className="col-span-1">
             <CardHeader>
@@ -181,7 +188,9 @@ export default function RevenueBreakdown() {
                   data={
                     timeRange === "thisWeek"
                       ? weeklyTrendData
-                      : monthlyTrendData
+                      : timeRange === "thisMonth"
+                      ? monthlyTrendData
+                      : lastMonthlyTrendData
                   }
                   margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                 >
@@ -202,7 +211,51 @@ export default function RevenueBreakdown() {
       </div>
 
       {/* Category Breakdown */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>X-Disturb Revenue</CardTitle>
+            <CardDescription>
+              {timeRange === "thisMonth"
+                ? "This Month"
+                : timeRange === "thisWeek"
+                ? "This Week"
+                : "Selected Period"}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">
+              $
+              {timeRange === "thisWeek"
+                ? revenueData.thisWeek[1].value.toLocaleString()
+                : revenueData.thisMonth[1].value.toLocaleString()}
+            </div>
+            <div className="text-sm text-muted-foreground mt-2">
+              {timeRange === "thisWeek"
+                ? "32% of weekly revenue"
+                : "42% of monthly revenue"}
+            </div>
+            <div className="mt-4">
+              <div className="flex items-center justify-between text-sm">
+                <span>Target</span>
+                <span className="font-medium">37,000</span>
+              </div>
+              <div className="w-full h-2 bg-gray-100 rounded-full mt-1">
+                <div
+                  className="h-full bg-red-400 rounded-full"
+                  style={{
+                    width: `${Math.min(
+                      100,
+                      (timeRange === "thisWeek"
+                        ? revenueData.thisWeek[1].value / 4000
+                        : revenueData.thisMonth[1].value / 15000) * 100
+                    )}%`,
+                  }}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
         <Card>
           <CardHeader>
             <CardTitle>Church Revenue</CardTitle>
@@ -229,7 +282,7 @@ export default function RevenueBreakdown() {
             <div className="mt-4">
               <div className="flex items-center justify-between text-sm">
                 <span>Target</span>
-                <span className="font-medium">$15,000</span>
+                <span className="font-medium">15,000</span>
               </div>
               <div className="w-full h-2 bg-gray-100 rounded-full mt-1">
                 <div
@@ -238,8 +291,8 @@ export default function RevenueBreakdown() {
                     width: `${Math.min(
                       100,
                       (timeRange === "thisWeek"
-                        ? revenueData.thisWeek[0].value / 4000
-                        : revenueData.thisMonth[0].value / 15000) * 100
+                        ? revenueData.thisWeek[1].value / 4000
+                        : revenueData.thisMonth[1].value / 15000) * 100
                     )}%`,
                   }}
                 />
@@ -263,8 +316,8 @@ export default function RevenueBreakdown() {
             <div className="text-3xl font-bold">
               $
               {timeRange === "thisWeek"
-                ? revenueData.thisWeek[1].value.toLocaleString()
-                : revenueData.thisMonth[1].value.toLocaleString()}
+                ? revenueData.thisWeek[2].value.toLocaleString()
+                : revenueData.thisMonth[2].value.toLocaleString()}
             </div>
             <div className="text-sm text-muted-foreground mt-2">
               {timeRange === "thisWeek"
@@ -274,7 +327,7 @@ export default function RevenueBreakdown() {
             <div className="mt-4">
               <div className="flex items-center justify-between text-sm">
                 <span>Target</span>
-                <span className="font-medium">$12,000</span>
+                <span className="font-medium">12,000</span>
               </div>
               <div className="w-full h-2 bg-gray-100 rounded-full mt-1">
                 <div
@@ -283,8 +336,8 @@ export default function RevenueBreakdown() {
                     width: `${Math.min(
                       100,
                       (timeRange === "thisWeek"
-                        ? revenueData.thisWeek[1].value / 3000
-                        : revenueData.thisMonth[1].value / 12000) * 100
+                        ? revenueData.thisWeek[2].value / 3000
+                        : revenueData.thisMonth[2].value / 12000) * 100
                     )}%`,
                   }}
                 />
@@ -308,8 +361,8 @@ export default function RevenueBreakdown() {
             <div className="text-3xl font-bold">
               $
               {timeRange === "thisWeek"
-                ? revenueData.thisWeek[2].value.toLocaleString()
-                : revenueData.thisMonth[2].value.toLocaleString()}
+                ? revenueData.thisWeek[3].value.toLocaleString()
+                : revenueData.thisMonth[3].value.toLocaleString()}
             </div>
             <div className="text-sm text-muted-foreground mt-2">
               {timeRange === "thisWeek"
@@ -319,7 +372,7 @@ export default function RevenueBreakdown() {
             <div className="mt-4">
               <div className="flex items-center justify-between text-sm">
                 <span>Target</span>
-                <span className="font-medium">$10,000</span>
+                <span className="font-medium">10,000</span>
               </div>
               <div className="w-full h-2 bg-gray-100 rounded-full mt-1">
                 <div
@@ -328,8 +381,8 @@ export default function RevenueBreakdown() {
                     width: `${Math.min(
                       100,
                       (timeRange === "thisWeek"
-                        ? revenueData.thisWeek[2].value / 2500
-                        : revenueData.thisMonth[2].value / 10000) * 100
+                        ? revenueData.thisWeek[3].value / 2500
+                        : revenueData.thisMonth[3].value / 10000) * 100
                     )}%`,
                   }}
                 />
