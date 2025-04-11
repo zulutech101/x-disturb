@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import DashboardCharts from "./dashboard-charts";
 import MetricCard from "./metric-card";
 import TopPerformingLocation from "./top-performing-location";
+import RevenueBreakdown from "./revenue-break-down";
 
 export function DashboardContent() {
   return (
@@ -65,6 +66,7 @@ export function DashboardContent() {
             changeType="positive"
           />
         </div>
+        <RevenueBreakdown />
       </div>
       <DashboardCharts />
       <TopPerformingLocation />
