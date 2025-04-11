@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+// import { Loader2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 /* eslint-disable */
 // Define types for HERE Maps API
@@ -21,11 +22,16 @@ const ActivityMap = ({ coords: { lat, lng }, radius }: ActivityMapProps) => {
   const markerRef = useRef<H.map.Marker | null>(null);
   const circleRef = useRef<H.map.Circle | null>(null);
   const platformRef = useRef<any>(null); // To hold the platform instance
+  const [isMapLoading, setIsMapLoading] = useState(true);
 
   // Load HERE Maps scripts and initialize the map
   useEffect(() => {
-    if (!mapRef.current) return;
+    if (!mapRef.current) {
+      setIsMapLoading(false);
+      return;
+    }
 
+    setIsMapLoading(true);
     const loadScript = (src: string): Promise<void> => {
       return new Promise((resolve) => {
         const script = document.createElement("script");
@@ -99,13 +105,17 @@ const ActivityMap = ({ coords: { lat, lng }, radius }: ActivityMapProps) => {
         },
       });
       mapInstance.current?.addObject(circleRef.current!);
+
+      setIsMapLoading(false);
     };
 
-    initializeMap().catch((error) =>
-      console.error("Error initializing map:", error)
-    );
+    initializeMap().catch((error) => {
+      setIsMapLoading(false);
+      console.error("Error initializing map:", error);
+    });
 
     // Cleanup function runs before the next effect or on unmount
+    setIsMapLoading(false);
     return () => {
       isMounted = false;
       if (mapInstance.current) {
@@ -117,8 +127,11 @@ const ActivityMap = ({ coords: { lat, lng }, radius }: ActivityMapProps) => {
 
   // Update map center, marker, and circle when coords change
   useEffect(() => {
-    if (!mapInstance.current || !markerRef.current || !circleRef.current)
+    setIsMapLoading(true);
+    if (!mapInstance.current || !markerRef.current || !circleRef.current) {
+      setIsMapLoading(false);
       return;
+    }
 
     // Update map center
     mapInstance.current.setCenter({ lat, lng });
@@ -128,9 +141,21 @@ const ActivityMap = ({ coords: { lat, lng }, radius }: ActivityMapProps) => {
 
     // Update circle position
     circleRef.current.setCenter({ lat, lng });
+    setIsMapLoading(false);
   }, [lat, lng]); // Depend on lat and lng to update when props change
 
-  return <div ref={mapRef} style={{ width: "100%", height: "500px" }} />;
+  return (
+    // <div className="relative">
+    //   {isMapLoading ? (
+    //     <div className="absolute w-full inset-0 flex items-center justify-center bg-slate-100 bg-opacity-80 z-10">
+    //       <Loader2 className="h-8 w-8 animate-spin text-primary" />
+    //       <span className="ml-2">Loading map...</span>
+    //     </div>
+    //   ) : (
+    <div ref={mapRef} style={{ width: "100%", height: "500px" }} />
+    // )}
+    // </div>
+  );
 };
 
 export default ActivityMap;
