@@ -247,8 +247,8 @@ export default function RevenueBreakdown() {
                     width: `${Math.min(
                       100,
                       (timeRange === "thisWeek"
-                        ? revenueData.thisWeek[1].value / 4000
-                        : revenueData.thisMonth[1].value / 15000) * 100
+                        ? revenueData.thisWeek[0].value / 4000
+                        : revenueData.thisMonth[0].value / 15000) * 100
                     )}%`,
                   }}
                 />
@@ -271,8 +271,8 @@ export default function RevenueBreakdown() {
             <div className="text-3xl font-bold">
               $
               {timeRange === "thisWeek"
-                ? revenueData.thisWeek[0].value.toLocaleString()
-                : revenueData.thisMonth[0].value.toLocaleString()}
+                ? revenueData.thisWeek[1].value.toLocaleString()
+                : revenueData.thisMonth[1].value.toLocaleString()}
             </div>
             <div className="text-sm text-muted-foreground mt-2">
               {timeRange === "thisWeek"
