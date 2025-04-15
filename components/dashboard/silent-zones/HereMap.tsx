@@ -63,7 +63,8 @@ const HereMap = ({ onCoordinatesChange, radius }: HereMapProps) => {
         script.src = src;
         script.async = true;
         script.onload = () => resolve();
-        script.onerror = () => reject(new Error(`Failed to load script: ${src}`));
+        script.onerror = () =>
+          reject(new Error(`Failed to load script: ${src}`));
         document.body.appendChild(script);
       });
     };
@@ -192,50 +193,6 @@ const HereMap = ({ onCoordinatesChange, radius }: HereMapProps) => {
   const handleCoordinateInputChange = (type: "lat" | "lng", value: string) => {
     const newCoord = { ...coordinates, [type]: value };
     setCoordinates(newCoord);
-
-    // Only update map if both coordinates are valid
-    if (newCoord.lat && newCoord.lng && mapInstance.current) {
-      const parsedLat = parseFloat(newCoord.lat);
-      const parsedLng = parseFloat(newCoord.lng);
-
-      if (!isNaN(parsedLat) && !isNaN(parsedLng)) {
-        // Update parent component
-        onCoordinatesChange({ lat: newCoord.lat, lng: newCoord.lng });
-
-        // Update map center
-        mapInstance.current.setCenter({ lat: parsedLat, lng: parsedLng });
-
-        // Update or create marker
-        if (markerRef.current) {
-          markerRef.current.setGeometry({ lat: parsedLat, lng: parsedLng });
-        } else {
-          markerRef.current = new H.map.Marker({
-            lat: parsedLat,
-            lng: parsedLng,
-          });
-          mapInstance.current.addObject(markerRef.current);
-        }
-
-        // Update or create circle
-        if (circleRef.current) {
-          circleRef.current.setCenter({ lat: parsedLat, lng: parsedLng });
-          circleRef.current.setRadius(radius);
-        } else {
-          circleRef.current = new H.map.Circle(
-            { lat: parsedLat, lng: parsedLng },
-            radius,
-            {
-              style: {
-                strokeColor: "rgba(255, 0, 0, 0.7)",
-                lineWidth: 2,
-                fillColor: "rgba(0, 255, 0, 0.3)",
-              },
-            }
-          );
-          mapInstance.current.addObject(circleRef.current);
-        }
-      }
-    }
   };
 
   // Handle search
@@ -270,32 +227,6 @@ const HereMap = ({ onCoordinatesChange, radius }: HereMapProps) => {
         };
         setCoordinates(newCoord);
         onCoordinatesChange(newCoord);
-
-        mapInstance.current.setCenter(position);
-        mapInstance.current.setZoom(14);
-
-        // Update or create marker
-        if (markerRef.current) {
-          markerRef.current.setGeometry(position);
-        } else {
-          markerRef.current = new H.map.Marker(position);
-          mapInstance.current.addObject(markerRef.current);
-        }
-
-        // Update or create circle
-        if (circleRef.current) {
-          circleRef.current.setCenter(position);
-          circleRef.current.setRadius(radius);
-        } else {
-          circleRef.current = new H.map.Circle(position, radius, {
-            style: {
-              strokeColor: "rgba(255, 0, 0, 0.7)",
-              lineWidth: 2,
-              fillColor: "rgba(0, 255, 0, 0.3)",
-            },
-          });
-          mapInstance.current.addObject(circleRef.current);
-        }
       } else {
         setError("No results found for your search query.");
       }
@@ -310,6 +241,40 @@ const HereMap = ({ onCoordinatesChange, radius }: HereMapProps) => {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    setIsMapLoading(true);
+    if (
+      !mapInstance.current ||
+      !markerRef.current ||
+      !circleRef.current ||
+      !coordinates.lat ||
+      !coordinates.lng
+    ) {
+      setIsMapLoading(false);
+      return;
+    }
+
+    // Update map center
+    mapInstance.current.setCenter({
+      lat: +coordinates.lat,
+      lng: +coordinates.lng,
+    });
+
+    // Update marker position
+    markerRef.current.setGeometry({
+      lat: +coordinates.lat,
+      lng: +coordinates.lng,
+    });
+
+    // Update circle position
+    circleRef.current.setCenter({
+      lat: +coordinates.lat,
+      lng: +coordinates.lng,
+    });
+
+    setIsMapLoading(false);
+  }, [coordinates]);
 
   return (
     <Card className="w-full mx-auto shadow-lg">
