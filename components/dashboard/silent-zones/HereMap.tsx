@@ -1,14 +1,15 @@
 "use client";
 
 import type React from "react";
-
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, MapPin, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Input } from "@/components/ui/input";
 import AddressField from "./AddressSuggestion";
+
 /* eslint-disable */
 // Define types for HERE Maps API
 declare global {
@@ -19,11 +20,15 @@ declare global {
 
 type HereMapProps = {
   onCoordinatesChange: (coords: { lat: string; lng: string }) => void;
-  radius: number; // Assuming this is intended to be "radius"
+  radius: number;
 };
 
 const HereMap = ({ onCoordinatesChange, radius }: HereMapProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
+  const mapInstance = useRef<H.Map | null>(null);
+  const markerRef = useRef<H.map.Marker | null>(null);
+  const circleRef = useRef<H.map.Circle | null>(null);
+  const platformRef = useRef<any>(null); // To hold the platform instance
   const [coordinates, setCoordinates] = useState<{
     lat: string | null;
     lng: string | null;
@@ -31,24 +36,14 @@ const HereMap = ({ onCoordinatesChange, radius }: HereMapProps) => {
     lat: null,
     lng: null,
   });
-
-  console.log({ radius });
-
-  const updateCoordinates = (coord: { lat: string; lng: string }) => {
-    setCoordinates(coord);
-    onCoordinatesChange(coord);
-  };
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [map, setMap] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isMapLoading, setIsMapLoading] = useState<boolean>(true);
-  const markersRef = useRef<any[]>([]);
-  const circleRef = useRef<any>(null); // Reference to the circle object
 
   const apikey: string = process.env.NEXT_PUBLIC_HERE_API_KEY || "";
 
-  // Load HERE Maps scripts
+  // Load HERE Maps scripts and initialize the map
   useEffect(() => {
     if (!apikey) {
       setError("API key is missing. Please check your environment variables.");
@@ -56,18 +51,56 @@ const HereMap = ({ onCoordinatesChange, radius }: HereMapProps) => {
       return;
     }
 
+    if (!mapRef.current) {
+      setIsMapLoading(false);
+      return;
+    }
+
     setIsMapLoading(true);
+    const loadScript = (src: string): Promise<void> => {
+      return new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        script.src = src;
+        script.async = true;
+        script.onload = () => resolve();
+        script.onerror = () =>
+          reject(new Error(`Failed to load script: ${src}`));
+        document.body.appendChild(script);
+      });
+    };
 
-    // Function to initialize map after scripts are loaded
-    const initMap = () => {
-      if (!mapRef.current || !window.H) return;
+    let isMounted = true;
 
+    const initializeMap = async () => {
       try {
-        const H = window.H;
-        const platform = new H.service.Platform({ apikey });
-        const defaultLayers = platform.createDefaultLayers();
+        // Load required HERE Maps scripts
+        await loadScript("https://js.api.here.com/v3/3.1/mapsjs-core.js");
+        await loadScript("https://js.api.here.com/v3/3.1/mapsjs-service.js");
+        await loadScript("https://js.api.here.com/v3/3.1/mapsjs-ui.js");
+        await loadScript("https://js.api.here.com/v3/3.1/mapsjs-mapevents.js");
 
-        const hereMap = new H.Map(
+        if (!isMounted) return;
+
+        const H = window.H;
+
+        if (!H) {
+          throw new Error("HERE Maps API not loaded");
+        }
+
+        // Clean up existing map instance if it exists
+        if (mapInstance.current) {
+          mapInstance.current.dispose();
+          mapInstance.current = null;
+        }
+
+        // Initialize platform with API key
+        platformRef.current = new H.service.Platform({ apikey });
+
+        // Create default layers
+        const defaultLayers = platformRef.current.createDefaultLayers();
+
+        // Initialize the map
+        mapInstance.current = new H.Map(
           mapRef.current,
           defaultLayers.vector.normal.map,
           {
@@ -77,57 +110,54 @@ const HereMap = ({ onCoordinatesChange, radius }: HereMapProps) => {
           }
         );
 
-        const mapEvents = new H.mapevents.MapEvents(hereMap);
-        new H.mapevents.Behavior(mapEvents);
+        // Add map events for interactivity (pan/zoom)
+        const behavior = new H.mapevents.Behavior(
+          new H.mapevents.MapEvents(mapInstance.current)
+        );
 
-        H.ui.UI.createDefault(hereMap, defaultLayers);
+        // Add UI controls
+        H.ui.UI.createDefault(mapInstance.current, defaultLayers);
 
-        hereMap.addEventListener("tap", (evt: any) => {
-          const coord = hereMap.screenToGeo(
+        // Add tap event listener for placing marker
+        mapInstance.current?.addEventListener("tap", (evt: any) => {
+          const coord = mapInstance.current!.screenToGeo(
             evt.currentPointer.viewportX,
             evt.currentPointer.viewportY
           );
 
           if (coord) {
-            // Update coordinates for UI
-            updateCoordinates({
+            const newCoord = {
               lat: coord.lat.toFixed(6),
               lng: coord.lng.toFixed(6),
-            });
+            };
+            setCoordinates(newCoord);
+            onCoordinatesChange(newCoord);
 
-            // Clear previous markers and circle
-            if (markersRef.current.length > 0) {
-              hereMap.removeObjects(markersRef.current);
-              markersRef.current = [];
+            // Update or create marker
+            if (markerRef.current) {
+              markerRef.current.setGeometry(coord);
+            } else {
+              markerRef.current = new H.map.Marker(coord);
+              mapInstance.current!.addObject(markerRef.current!);
             }
+
+            // Update or create circle
             if (circleRef.current) {
-              hereMap.removeObject(circleRef.current);
-              circleRef.current = null;
-            }
-
-            // Add marker using raw float values
-            const marker = new H.map.Marker(coord);
-            hereMap.addObject(marker);
-            markersRef.current.push(marker);
-
-            // Add circle centered on the marker
-            const circle = new H.map.Circle(
-              coord,
-              radius, // Use the radius prop (in meters)
-              {
+              circleRef.current.setCenter(coord);
+              circleRef.current.setRadius(radius);
+            } else {
+              circleRef.current = new H.map.Circle(coord, radius, {
                 style: {
-                  strokeColor: "rgba(255, 0, 0, 0.7)", // Red outline
+                  strokeColor: "rgba(255, 0, 0, 0.7)",
                   lineWidth: 2,
-                  fillColor: "rgba(0, 255, 0, 0.3)", // Green fill with transparency
+                  fillColor: "rgba(0, 255, 0, 0.3)",
                 },
-              }
-            );
-            hereMap.addObject(circle);
-            circleRef.current = circle;
+              });
+              mapInstance.current!.addObject(circleRef.current!);
+            }
           }
         });
 
-        setMap(hereMap);
         setIsMapLoading(false);
       } catch (err) {
         console.error("Map initialization error:", err);
@@ -140,75 +170,42 @@ const HereMap = ({ onCoordinatesChange, radius }: HereMapProps) => {
       }
     };
 
-    // Load scripts in sequence with callbacks
-    const loadScript = (url: string, callback: () => void) => {
-      const script = document.createElement("script");
-      script.type = "text/javascript";
-      script.src = url;
-      script.onload = callback;
-      script.onerror = () => {
-        setError("Failed to load HERE Maps scripts. Please try again later.");
-        setIsMapLoading(false);
-      };
-      document.head.appendChild(script);
-    };
+    initializeMap();
 
-    // Load CSS
-    const link = document.createElement("link");
-    link.rel = "stylesheet";
-    link.href = "https://js.api.here.com/v3/3.1/mapsjs-ui.css";
-    document.head.appendChild(link);
-
-    // Load scripts in sequence
-    loadScript("https://js.api.here.com/v3/3.1/mapsjs-core.js", () => {
-      loadScript("https://js.api.here.com/v3/3.1/mapsjs-service.js", () => {
-        loadScript("https://js.api.here.com/v3/3.1/mapsjs-ui.js", () => {
-          loadScript(
-            "https://js.api.here.com/v3/3.1/mapsjs-mapevents.js",
-            () => {
-              // All scripts loaded, initialize map
-              setTimeout(() => {
-                if (window.H) {
-                  initMap();
-                } else {
-                  setError(
-                    "HERE Maps API failed to initialize. Please refresh the page."
-                  );
-                  setIsMapLoading(false);
-                }
-              }, 100); // Small delay to ensure scripts are fully initialized
-            }
-          );
-        });
-      });
-    });
-
+    // Cleanup function
     return () => {
-      if (map) {
-        map.dispose();
+      isMounted = false;
+      if (mapInstance.current) {
+        mapInstance.current.dispose();
+        mapInstance.current = null;
       }
     };
   }, [apikey]);
 
   // Update circle radius when radius prop changes
   useEffect(() => {
-    if (!map || !circleRef.current) return;
+    if (!mapInstance.current || !circleRef.current) return;
 
-    circleRef.current.setRadius(radius); // Update the circle's radius dynamically
-  }, [radius, map]);
+    circleRef.current.setRadius(radius);
+  }, [radius]);
 
-  // Use direct REST API for geocoding instead of the service API
+  // Handle coordinate input changes
+  const handleCoordinateInputChange = (type: "lat" | "lng", value: string) => {
+    const newCoord = { ...coordinates, [type]: value };
+    setCoordinates(newCoord);
+  };
+
+  // Handle search
   const handleSearch = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    e.stopPropagation(); // Prevent any bubbling weirdness
+    e.stopPropagation();
 
-    if (!searchQuery || !map) return;
+    if (!searchQuery || !mapInstance.current) return;
 
     setIsLoading(true);
     setError(null);
 
     try {
-      // Use the REST API directly
       const encodedQuery = encodeURIComponent(searchQuery);
       const url = `https://geocode.search.hereapi.com/v1/geocode?q=${encodedQuery}&apiKey=${apikey}`;
 
@@ -224,43 +221,12 @@ const HereMap = ({ onCoordinatesChange, radius }: HereMapProps) => {
 
       if (data.items && data.items.length > 0) {
         const position = data.items[0].position;
-        updateCoordinates({
+        const newCoord = {
           lat: position.lat.toFixed(6),
           lng: position.lng.toFixed(6),
-        });
-
-        map.setCenter({ lat: position.lat, lng: position.lng });
-        map.setZoom(14);
-
-        // Clear previous markers and circle
-        if (markersRef.current.length > 0) {
-          map.removeObjects(markersRef.current);
-          markersRef.current = [];
-        }
-        if (circleRef.current) {
-          map.removeObject(circleRef.current);
-          circleRef.current = null;
-        }
-
-        // Add new marker
-        const marker = new window.H.map.Marker(position);
-        map.addObject(marker);
-        markersRef.current.push(marker);
-
-        // Add circle centered on the marker
-        const circle = new window.H.map.Circle(
-          position,
-          radius, // Use the radius prop (in meters)
-          {
-            style: {
-              strokeColor: "rgba(255, 0, 0, 0.7)",
-              lineWidth: 2,
-              fillColor: "rgba(0, 255, 0, 0.3)",
-            },
-          }
-        );
-        map.addObject(circle);
-        circleRef.current = circle;
+        };
+        setCoordinates(newCoord);
+        onCoordinatesChange(newCoord);
       } else {
         setError("No results found for your search query.");
       }
@@ -276,17 +242,44 @@ const HereMap = ({ onCoordinatesChange, radius }: HereMapProps) => {
     }
   };
 
+  useEffect(() => {
+    setIsMapLoading(true);
+    if (
+      !mapInstance.current ||
+      !markerRef.current ||
+      !circleRef.current ||
+      !coordinates.lat ||
+      !coordinates.lng
+    ) {
+      setIsMapLoading(false);
+      return;
+    }
+
+    // Update map center
+    mapInstance.current.setCenter({
+      lat: +coordinates.lat,
+      lng: +coordinates.lng,
+    });
+
+    // Update marker position
+    markerRef.current.setGeometry({
+      lat: +coordinates.lat,
+      lng: +coordinates.lng,
+    });
+
+    // Update circle position
+    circleRef.current.setCenter({
+      lat: +coordinates.lat,
+      lng: +coordinates.lng,
+    });
+
+    setIsMapLoading(false);
+  }, [coordinates]);
+
   return (
     <Card className="w-full mx-auto shadow-lg">
       <CardContent>
-        <div
-          onSubmit={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            handleSearch(e as any); // Only if you want to reuse the logic, or call handleSearch directly on button click
-          }}
-          className="flex gap-2 mb-4"
-        >
+        <div className="flex gap-2 mb-4">
           <div className="flex-1">
             <AddressField
               value={searchQuery}
@@ -309,7 +302,7 @@ const HereMap = ({ onCoordinatesChange, radius }: HereMapProps) => {
             {isLoading ? (
               <Loader2 className="h-4 w-4 animate-spin mr-2" />
             ) : (
-              <Search className="h-4 w-4 mr-2 " />
+              <Search className="h-4 w-4 mr-2" />
             )}
             Search
           </Button>
@@ -317,8 +310,7 @@ const HereMap = ({ onCoordinatesChange, radius }: HereMapProps) => {
 
         <div
           className={cn(
-            "relative w-full h-[400px] bg-slate-100 rounded-md overflow-hidden",
-            isMapLoading && "flex items-center justify-center"
+            "relative w-full h-[400px] bg-slate-100 rounded-md overflow-hidden"
           )}
         >
           {isMapLoading && (
@@ -340,15 +332,27 @@ const HereMap = ({ onCoordinatesChange, radius }: HereMapProps) => {
           <div className="mt-4 p-3 bg-slate-50 rounded-md flex items-center justify-center gap-4">
             <div className="flex items-center">
               <MapPin className="h-4 w-4 mr-1 text-primary" />
-              <span className="text-sm font-medium">
-                Lat: {coordinates.lat}
-              </span>
+              <Input
+                type="text"
+                value={coordinates.lat}
+                onChange={(e) =>
+                  handleCoordinateInputChange("lat", e.target.value)
+                }
+                placeholder="Latitude"
+                className="w-32 text-sm"
+              />
             </div>
             <div className="flex items-center">
               <MapPin className="h-4 w-4 mr-1 text-primary" />
-              <span className="text-sm font-medium">
-                Lng: {coordinates.lng}
-              </span>
+              <Input
+                type="text"
+                value={coordinates.lng}
+                onChange={(e) =>
+                  handleCoordinateInputChange("lng", e.target.value)
+                }
+                placeholder="Longitude"
+                className="w-32 text-sm"
+              />
             </div>
           </div>
         )}

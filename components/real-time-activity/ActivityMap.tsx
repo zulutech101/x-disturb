@@ -1,6 +1,6 @@
 "use client";
 
-// import { Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react"; // Uncommented to use Loader2
 import { useEffect, useRef, useState } from "react";
 
 /* eslint-disable */
@@ -115,7 +115,6 @@ const ActivityMap = ({ coords: { lat, lng }, radius }: ActivityMapProps) => {
     });
 
     // Cleanup function runs before the next effect or on unmount
-    setIsMapLoading(false);
     return () => {
       isMounted = false;
       if (mapInstance.current) {
@@ -145,16 +144,15 @@ const ActivityMap = ({ coords: { lat, lng }, radius }: ActivityMapProps) => {
   }, [lat, lng]); // Depend on lat and lng to update when props change
 
   return (
-    // <div className="relative">
-    //   {isMapLoading ? (
-    //     <div className="absolute w-full inset-0 flex items-center justify-center bg-slate-100 bg-opacity-80 z-10">
-    //       <Loader2 className="h-8 w-8 animate-spin text-primary" />
-    //       <span className="ml-2">Loading map...</span>
-    //     </div>
-    //   ) : (
-    <div ref={mapRef} style={{ width: "100%", height: "500px" }} />
-    // )}
-    // </div>
+    <div className="relative">
+      {isMapLoading ? (
+        <div className="absolute w-full inset-0 flex items-center justify-center bg-slate-100 bg-opacity-80 z-10">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <span className="ml-2">Loading map...</span>
+        </div>
+      ) : null}
+      <div ref={mapRef} style={{ width: "100%", height: "500px" }} />
+    </div>
   );
 };
 
