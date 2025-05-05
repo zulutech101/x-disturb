@@ -12,6 +12,7 @@ import {
   ChevronLeft,
   ChevronRight,
   LogOut,
+  KeyIcon
 } from "lucide-react";
 import {
   Sidebar,
@@ -41,6 +42,7 @@ const sidebarRoutes = [
   },
   { label: "Transactions", icon: Receipt, path: "/dashboard/transactions" },
   { label: "Reports", icon: FileText, path: "/dashboard/reports" },
+  { label: "Referals", icon: KeyIcon, path: "/dashboard/referral-management" },
 ];
 
 export default function AppSidebar() {
