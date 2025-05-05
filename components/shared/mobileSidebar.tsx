@@ -12,6 +12,8 @@ import {
   LogOut,
   Menu,
   X,
+  Bell,
+  KeyIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -30,6 +32,8 @@ const sidebarRoutes = [
   },
   { label: "Transactions", icon: Receipt, path: "/dashboard/transactions" },
   { label: "Reports", icon: FileText, path: "/dashboard/reports" },
+  { label: "Push Notification", icon: Bell, path: "/dashboard/push-notification" },
+  { label: "Referals", icon: KeyIcon, path: "/dashboard/referral-management" },
 ];
 
 export default function MobileSidebar() {

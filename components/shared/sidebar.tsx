@@ -12,7 +12,8 @@ import {
   ChevronLeft,
   ChevronRight,
   LogOut,
-  KeyIcon
+  KeyIcon,
+    Bell
 } from "lucide-react";
 import {
   Sidebar,
@@ -42,6 +43,7 @@ const sidebarRoutes = [
   },
   { label: "Transactions", icon: Receipt, path: "/dashboard/transactions" },
   { label: "Reports", icon: FileText, path: "/dashboard/reports" },
+  { label: "Push Notification", icon: Bell, path: "/dashboard/push-notification" },
   { label: "Referals", icon: KeyIcon, path: "/dashboard/referral-management" },
 ];
 
