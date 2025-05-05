@@ -23,11 +23,15 @@ import Link from "next/link";
 interface UserManagementTableProps {
   users: User[];
   handleToggle: (id: string, status: boolean) => void;
+  handleDelete: (id: string) => void;
   isLoading: boolean;
 }
+
 const UserManagementTable = ({
   users,
   handleToggle,
+  handleDelete,
+
   isLoading,
 }: UserManagementTableProps) => {
   // const router = useRouter()
@@ -43,6 +47,11 @@ const UserManagementTable = ({
             <TableHead className="px-6 py-4 text-left text-sm font-medium text-gray-900 dark:text-white">
               Email
             </TableHead>
+            <TableHead>Role</TableHead>
+            <TableHead>Referral Code</TableHead>
+            <TableHead>Registered On</TableHead>
+            <TableHead>Last Login</TableHead>
+
             <TableHead className="px-6 py-4 text-left text-sm font-medium text-gray-900 dark:text-white">
               Action
             </TableHead>
@@ -89,6 +98,19 @@ const UserManagementTable = ({
                   <TableCell className="px-6 py-4 text-sm text-gray-500  dark:text-gray-200">
                     {user.email || "N/A"}
                   </TableCell>
+                  <TableCell>{user.role || "N/A"}</TableCell>
+                  <TableCell>{user.referralCode || "N/A"}</TableCell>
+                  <TableCell>
+                    {user.createdAt
+                      ? new Date(user.createdAt.toDate()).toLocaleDateString()
+                      : "N/A"}
+                  </TableCell>
+                  <TableCell>
+                    {user.lastLogin
+                      ? new Date(user.lastLogin.toDate()).toLocaleString()
+                      : "N/A"}
+                  </TableCell>
+
                   <TableCell className="flex items-center gap-3 px-6 py-4 text-sm">
                     <TooltipProvider>
                       <Tooltip>
@@ -111,6 +133,7 @@ const UserManagementTable = ({
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <button
+                            onClick={() => handleDelete(user.id)}
                             className="p-2 rounded-full hover:bg-red-100 dark:hover:bg-red-900 transition-colors"
                             aria-label="Delete user"
                           >

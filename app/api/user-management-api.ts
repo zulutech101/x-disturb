@@ -7,6 +7,8 @@ import {
   onSnapshot,
   doc,
   updateDoc,
+  Timestamp,
+  deleteDoc,
 } from "firebase/firestore";
 import { db } from "@/app/firebase/config";
 
@@ -16,8 +18,10 @@ export interface User {
   name: string;
   email: string;
   isActive: boolean;
-  createdAt: string;
+  createdAt?: Timestamp;
+  lastLogin?: Timestamp;
   role?: string;
+  referralCode?: string;
 }
 
 // Function to fetch users
@@ -78,27 +82,40 @@ export const updateUserStatus = async (
 
 export const updateUserData = async (
   userId: string,
-  email: string,
-  username: string,
-  currentStatus: boolean,
-  reason: string,
+  data: {
+    email: string;
+    username: string;
+    currentStatus: boolean;
+    reason: string;
+  }
 ) => {
   try {
     const userRef = doc(db, "users", userId);
     await updateDoc(userRef, {
-      isActive: currentStatus,
+      email: data.email,
+      username: data.username,
+      isActive: data.currentStatus,
+      reason: data.reason,
       updatedAt: new Date().toISOString(),
-      email: email,
-      username: username,
-      reason: reason,
     });
-    return { success: true, message: "User status updated successfully" };
+    return { success: true, message: "User updated successfully" };
   } catch (error) {
-    console.error("Error updating user status:", error);
+    console.error("Error updating user:", error);
     return {
       success: false,
       message:
-        error instanceof Error ? error.message : "Failed to update status",
+        error instanceof Error ? error.message : "Failed to update user",
     };
+  }
+};
+
+
+export const deleteUser = async (userId: string) => {
+  try {
+    await deleteDoc(doc(db, "users", userId));
+    return { success: true };
+  } catch (err) {
+    console.error("Failed to delete user:", err);
+    return { success: false, message: "Failed to delete user" };
   }
 };

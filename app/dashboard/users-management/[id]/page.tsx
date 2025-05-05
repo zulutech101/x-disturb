@@ -20,36 +20,34 @@ import { db } from "@/app/firebase/config";
 import { useParams } from "next/navigation";
 import { Switch } from "@/components/ui/switch";
 
-
-
 const UserDetailPage = () => {
   const [isUpdating, setIsUpdating] = useState(false);
   const params = useParams();
   const userId = params.id as string;
-   const formSchema = z.object({
+
+  const formSchema = z.object({
     email: z.string().email(),
-    username: z.string().min(4, { message: "" }),
+    username: z.string().min(4, { message: "Username must be at least 4 characters" }),
     reason: z.string(),
     currentStatus: z.boolean(),
+    role: z.enum(["admin", "user"]),
+    referralCode: z.string().optional(),
   });
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsUpdating(true);
-    await updateUserData(
-      userId,
-      values.email,
-      values.username,
-      values.currentStatus,
-      values.reason
-    );
-
+    await updateUserData(userId, {
+      email: values.email,
+      username: values.username,
+      currentStatus: values.currentStatus,
+      reason: values.reason,
+    });
     setIsUpdating(false);
   }
-
-  console.log(userId);
 
   useEffect(() => {
     const fetchAdminProfile = async () => {
@@ -63,9 +61,11 @@ const UserDetailPage = () => {
             email: data.email || "",
             username: data.username || "",
             currentStatus: data.isActive,
+            role: data.role || "user",
+            referralCode: data.referralCode || "",
+            reason: "",
           });
         }
-        console.log(docSnap.data());
       } catch (err) {
         console.error("Error fetching admin profile:", err);
       }
@@ -75,12 +75,12 @@ const UserDetailPage = () => {
   }, [userId, form]);
 
   return (
-    <div className="w-full mx-auto bg-white dark:bg-gray-900 text-gray-950 dark:text-white  rounded-lg p-6">
+    <div className="w-full mx-auto bg-white dark:bg-gray-900 text-gray-950 dark:text-white rounded-lg p-6">
       <h1 className="text-3xl font-bold mb-6">Manage User</h1>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          {/* Zone Name */}
-          <Image src="/profile.png" alt="B" width={180} height={180} />
+          <Image src="/profile.png" alt="Profile" width={180} height={180} />
+
           <FormField
             control={form.control}
             name="currentStatus"
@@ -88,10 +88,7 @@ const UserDetailPage = () => {
               <FormItem className="flex items-center space-x-2">
                 <FormLabel>Is Active</FormLabel>
                 <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
+                  <Switch checked={field.value} onCheckedChange={field.onChange} />
                 </FormControl>
                 <FormMessage className="text-sm text-red-600" />
               </FormItem>
@@ -112,7 +109,6 @@ const UserDetailPage = () => {
             )}
           />
 
-          {/* Description */}
           <FormField
             control={form.control}
             name="username"
@@ -120,18 +116,13 @@ const UserDetailPage = () => {
               <FormItem>
                 <FormLabel>Username</FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder="username"
-                    {...field}
-                    className="lg:w-1/2"
-                  />
+                  <Input placeholder="username" {...field} className="lg:w-1/2" />
                 </FormControl>
                 <FormMessage className="text-sm text-red-600" />
               </FormItem>
             )}
           />
 
-          {/* Reason */}
           <FormField
             control={form.control}
             name="reason"
@@ -139,11 +130,35 @@ const UserDetailPage = () => {
               <FormItem>
                 <FormLabel>Reason</FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder="enter reason"
-                    {...field}
-                    className="lg:w-1/2"
-                  />
+                  <Input placeholder="enter reason" {...field} className="lg:w-1/2" />
+                </FormControl>
+                <FormMessage className="text-sm text-red-600" />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="role"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Role</FormLabel>
+                <FormControl>
+                  <Input placeholder="admin or user" {...field} className="lg:w-1/2" />
+                </FormControl>
+                <FormMessage className="text-sm text-red-600" />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="referralCode"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Referral Code</FormLabel>
+                <FormControl>
+                  <Input placeholder="e.g., Orthodox Tewahedo" {...field} className="lg:w-1/2" />
                 </FormControl>
                 <FormMessage className="text-sm text-red-600" />
               </FormItem>
@@ -151,21 +166,12 @@ const UserDetailPage = () => {
           />
 
           <div className="flex justify-end space-x-2 pt-4">
-            <Button
-              onClick={() => form.reset()}
-              variant="outline"
-              type="button"
-              className="cursor-pointer"
-            >
+            <Button onClick={() => form.reset()} variant="outline" type="button" className="cursor-pointer">
               Cancel
             </Button>
-            <Button
-              disabled={isUpdating}
-              type="submit"
-              className={`${
-                isUpdating ? "bg-[#e78064]" : "bg-[#E66641]"
-              } text-white cursor-pointer`}
-            >
+            <Button disabled={isUpdating} type="submit" className={`${
+              isUpdating ? "bg-[#e78064]" : "bg-[#E66641]"
+            } text-white cursor-pointer`}>
               {isUpdating ? "Updating" : "Update"}
             </Button>
           </div>
