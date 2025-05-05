@@ -4,207 +4,320 @@ import React, { useEffect, useState } from "react";
 import {
   fetchReferralCodes,
   addReferralCode,
-  deleteReferralCode,
   updateReferralCode,
+  deleteReferralCode,
+  getUsersByReferralCode,
+  sendPushToGroup,
+  exportUsersByGroup,
+  fetchReferralCodeById,
 } from "@/app/api/referral-management-api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
-import { Pencil, Trash2 } from "lucide-react";
-import { Timestamp } from "firebase/firestore";
-import { toast } from "react-toastify";
+import { Pencil, Trash2, Send, Download, Eye, Loader } from "lucide-react";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { User } from "@/app/api/user-management-api";
 
+type ReferralCategory = "Orthodox" | "Protestant" | "Mosque" | "Library";
 interface ReferralCode {
   id: string;
   name: string;
   description: string;
-  createdAt?: Timestamp;
+  category: ReferralCategory;
 }
 
 const ReferralManagementPage = () => {
-  const [referralCodes, setReferralCodes] = useState<ReferralCode[]>([]);
+  const [codes, setCodes] = useState<ReferralCode[]>([]);
   const [open, setOpen] = useState(false);
-  const [editing, setEditing] = useState<ReferralCode | null>(null);
-  const [formData, setFormData] = useState({ name: "", description: "" });
-  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [editCode, setEditCode] = useState<ReferralCode | null>(null);
+  const [formData, setFormData] = useState<
+    Omit<ReferralCode, "id" | "createdAt">
+  >({
+    name: "",
+    description: "",
+    category: "Orthodox",
+  });
 
   const getCodes = async () => {
     const data = await fetchReferralCodes();
-    setReferralCodes(data);
+    setCodes(data);
   };
 
   useEffect(() => {
     getCodes();
   }, []);
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleSave = async () => {
     if (!formData.name.trim()) return;
-
+    setIsSaving(true);
     try {
-      if (editing) {
-        await updateReferralCode(editing.id, formData);
-        toast.success(`"${formData.name}" updated successfully`);
+      if (editCode) {
+        await updateReferralCode(editCode.id, formData);
+        toast.success(`Updated ${formData.name}`);
       } else {
-        await addReferralCode(formData.name, formData.description);
-        toast.success(`"${formData.name}" added successfully`);
+        await addReferralCode(formData);
+        toast.success(`Added ${formData.name}`);
       }
-
       setOpen(false);
-      setEditing(null);
-      setFormData({ name: "", description: "" });
+      setFormData({ name: "", description: "", category: "Orthodox" });
+      setEditCode(null);
       getCodes();
-    } catch (err) {
-      console.log(err);
-      toast.error("Failed to save referral code");
+    } catch {
+      toast.error("Save failed");
+    } finally {
+      setIsSaving(false);
     }
-  };
-
-  const handleEdit = (code: ReferralCode) => {
-    setEditing(code);
-    setFormData({ name: code.name, description: code.description });
-    setOpen(true);
   };
 
   const handleDelete = async (id: string) => {
-    const code = referralCodes.find((c) => c.id === id);
-    if (!code) return;
-
-    const confirmed = confirm(
-      `Are you sure you want to delete "${code.name}"?`
-    );
-    if (!confirmed) return;
-
     try {
-      setDeletingId(id);
       await deleteReferralCode(id);
-      toast.success(`"${code.name}" has been deleted`);
+      toast.success("Referral code deleted");
       getCodes();
+    } catch {
+      toast.error("Delete failed");
+    }
+  };
+  const [viewingUsers, setViewingUsers] = useState<User[]>([]);
+  const [selectedGroupName, setSelectedGroupName] = useState<string>("");
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+
+  const handleViewUsers = async (code: ReferralCode) => {
+    try {
+      const users = await getUsersByReferralCode(code.id);
+      setViewingUsers(users);
+      setSelectedGroupName(code.name);
+      setIsViewModalOpen(true);
     } catch (err) {
       console.log(err);
-
-      toast.error("Failed to delete referral code");
-    } finally {
-      setDeletingId(null);
+      toast.error("Failed to fetch users");
     }
   };
 
+  const handleSendPush = async (code: ReferralCode) => {
+    await sendPushToGroup(code.id);
+    toast.success(`Push sent to ${code.name} group`);
+  };
+
+  const handleExport = async (code: ReferralCode) => {
+    await exportUsersByGroup(code.id);
+    toast.success(`Exported users for ${code.name}`);
+  };
+
+  const handleEdit = async (id: string) => {
+    try {
+      const code = await fetchReferralCodeById(id);
+      if (code) {
+        setEditCode(code);
+        setFormData({
+          name: code.name,
+          description: code.description,
+          category: code.category,
+        });
+        setOpen(true);
+      } else {
+        toast.error("Referral code not found");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to fetch referral code");
+    }
+  };
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      <div className="flex justify-between items-center mb-8">
-        <h2 className="text-3xl font-semibold tracking-tight text-gray-800 dark:text-white">
-          🔑 Referral Code Management
+    <div className="p-6">
+      <ToastContainer />
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-semibold text-gray-800 dark:text-white">
+          Referral Code Management
         </h2>
         <Button
-          onClick={() => setOpen(true)}
-          className="bg-primary text-white hover:bg-primary/90"
+          onClick={() => {
+            setEditCode(null); // CLEAR this first!
+            setFormData({ name: "", description: "", category: "Orthodox" }); // also reset form
+            setOpen(true);
+          }}
         >
           + Add Referral Code
         </Button>
       </div>
 
-      <div className="rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 shadow-sm">
-        <table className="min-w-full text-sm bg-white dark:bg-gray-900">
-          <thead className="bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300">
-            <tr>
-              <th className="p-4 text-left font-semibold">Name</th>
-              <th className="p-4 text-left font-semibold">Description</th>
-              <th className="p-4 text-center font-semibold">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tbody>
-              {referralCodes.length > 0 ? (
-                referralCodes.map((code) => (
-                  <tr
-                    key={code.id}
-                    className="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                  >
-                    <td className="p-4 text-gray-800 dark:text-white">
-                      {code.name}
-                    </td>
-                    <td className="p-4 text-gray-600 dark:text-gray-300">
-                      {code.description}
-                    </td>
-                    <td className="p-4">
-                      <div className="flex justify-center items-center gap-2">
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={() => handleEdit(code)}
-                          disabled={deletingId === code.id}
-                          aria-label="Edit"
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="destructive"
-                          size="icon"
-                          onClick={() => handleDelete(code.id)}
-                          disabled={deletingId === code.id}
-                          aria-label="Delete"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td
-                    colSpan={3}
-                    className="p-6 text-center text-muted-foreground"
-                  >
-                    No referral codes yet.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </tbody>
-        </table>
-      </div>
+      <table className="w-full border text-sm bg-white dark:bg-gray-900 rounded">
+        <thead className="bg-gray-100 dark:bg-gray-800 text-left">
+          <tr>
+            <th className="p-3">Name</th>
+            <th className="p-3">Description</th>
+            <th className="p-3">Category</th>
+            <th className="p-3 text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {codes.map((code) => (
+            <tr
+              key={code.id}
+              className="border-t hover:bg-gray-50 dark:hover:bg-gray-800"
+            >
+              <td className="p-3">{code.name}</td>
+              <td className="p-3">{code.description}</td>
+              <td className="p-3">{code.category}</td>
+              <td className="p-3 text-center space-x-2">
+              <Button onClick={() => handleViewUsers(code)}>
+                  <Eye size={16} />
+                </Button>
+                <Button onClick={() => handleEdit(code.id)}>
+                  <Pencil size={16} />
+                </Button>
 
-      {/* Modal */}
+                <Button
+                  className="text-red-500"
+                  onClick={() => handleDelete(code.id)}
+                >
+                  <Trash2 size={16} />
+                </Button>
+              
+                <Button onClick={() => handleSendPush(code)}>
+                  <Send size={16} />
+                </Button>
+                <Button onClick={() => handleExport(code)}>
+                  <Download size={16} />
+                </Button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="bg-white dark:bg-gray-900 border-none shadow-xl rounded-lg">
+        <DialogContent className="bg-white dark:bg-gray-900">
           <DialogHeader>
-            <DialogTitle className="text-xl font-semibold text-gray-800 dark:text-white">
-              {editing ? "Edit Referral Code" : "Add Referral Code"}
-            </DialogTitle>
+            <DialogTitle>{editCode ? "Edit" : "Add"} Referral Code</DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4 mt-4">
-            <Input
-              placeholder="Code name (e.g., Mosque)"
-              value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
-            />
-            <Input
-              placeholder="Description"
-              value={formData.description}
-              onChange={(e) =>
-                setFormData({ ...formData, description: e.target.value })
-              }
-            />
+            <div>
+              <label
+                htmlFor="referral-name"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
+                Name
+              </label>
+              <Input
+                id="referral-name"
+                placeholder="e.g. Orthodox Special"
+                value={formData.name}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="referral-description"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
+                Description
+              </label>
+              <Input
+                id="referral-description"
+                placeholder="Optional description"
+                value={formData.description}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="referral-category"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
+                Category
+              </label>
+              <select
+                id="referral-category"
+                className="w-full border p-2 rounded bg-gray-100 dark:bg-gray-800 dark:text-white"
+                value={formData.category}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    category: e.target.value as ReferralCategory,
+                  })
+                }
+              >
+                <option value="Orthodox">Orthodox</option>
+                <option value="Protestant">Protestant</option>
+                <option value="Mosque">Mosque</option>
+                <option value="Library">Library</option>
+              </select>
+            </div>
           </div>
 
           <DialogFooter className="mt-6">
             <Button variant="outline" onClick={() => setOpen(false)}>
               Cancel
             </Button>
-            <Button
-              className="bg-primary text-white hover:bg-primary/90"
-              onClick={handleSave}
-            >
-              {editing ? "Update" : "Create"}
+            <Button onClick={handleSave} disabled={isSaving}>
+              {isSaving ? (
+                <Loader size={16} className="animate-spin" />
+              ) : editCode ? (
+                "Update"
+              ) : (
+                "Create"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
+        <DialogContent className="bg-white dark:bg-gray-900 max-w-xl">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-semibold">
+              Users in <span className="text-primary">{selectedGroupName}</span>
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="max-h-[400px] overflow-y-auto mt-4 space-y-3">
+            {viewingUsers.length > 0 ? (
+              viewingUsers.map((user) => (
+                <div
+                  key={user.id}
+                  className="border p-3 rounded-md flex justify-between items-center text-sm bg-gray-50 dark:bg-gray-800"
+                >
+                  <div>
+                    <p className="font-medium text-gray-900 dark:text-white">
+                      {user.name}
+                    </p>
+                    <p className="text-gray-600 dark:text-gray-300">
+                      {user.email}
+                    </p>
+                  </div>
+                  {user.role && (
+                    <span className="text-xs px-2 py-1 rounded bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200">
+                      {user.role}
+                    </span>
+                  )}
+                </div>
+              ))
+            ) : (
+              <p className="text-center text-muted-foreground">
+                No users found.
+              </p>
+            )}
+          </div>
+
+          <DialogFooter className="mt-6">
+            <Button variant="outline" onClick={() => setIsViewModalOpen(false)}>
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>

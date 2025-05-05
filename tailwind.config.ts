@@ -1,5 +1,5 @@
-import type { Config } from "tailwindcss"
-import animatePlugin from "tailwindcss-animate"
+import type { Config } from "tailwindcss";
+import animatePlugin from "tailwindcss-animate";
 
 const config = {
   darkMode: "class",
@@ -20,19 +20,14 @@ const config = {
     },
     extend: {
       colors: {
-        primary: {
-          DEFAULT: "#e66641", // Light mode primary color
-          secondary: "#b54c2f", // Light mode secondary color
-        },
-        dark: {
-          primary: "#8c3220", // Dark mode equivalent of #e66641
-          secondary: "#662417", // Dark mode equivalent of #b54c2f
-        },
-        text: {
-          light: "#000000", // Black for light mode text
-          dark: "#ffffff", // White for dark mode text
-        },
+        primary: "#e66641",
+        "primary-secondary": "#b54c2f",
+        "dark-primary": "#8c3220",
+        "dark-secondary": "#662417",
+        "text-light": "#000000",
+        "text-dark": "#ffffff",
       },
+
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
@@ -55,11 +50,11 @@ const config = {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-         "bar-bounce": "bar-bounce 1s ease-in-out infinite"
+        "bar-bounce": "bar-bounce 1s ease-in-out infinite",
       },
     },
   },
   plugins: [animatePlugin],
-} satisfies Config
+} satisfies Config;
 
-export default config
+export default config;
