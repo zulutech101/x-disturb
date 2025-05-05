@@ -50,7 +50,7 @@ const formSchema = z.object({
     message: "Zone name must be at least 2 characters.",
   }),
   radius: z.number().min(1).max(500),
-  type: z.enum(["church", "mosque", "library"]),
+  type: z.enum(["Orthodox Tewahedo", "Protestant", "Mosque", "Library"]),
 });
 
 export default function CreateSilentZone() {
@@ -69,7 +69,7 @@ export default function CreateSilentZone() {
       isActive: true,
       name: "",
       radius: 100,
-      type: "church",
+      type: "Orthodox Tewahedo",
     },
   });
 
@@ -172,9 +172,12 @@ export default function CreateSilentZone() {
                       <SelectValue placeholder="Select Location Type" />
                     </SelectTrigger>
                     <SelectContent className="bg-white">
-                      <SelectItem value="church">church</SelectItem>
-                      <SelectItem value="mosque">Mosque</SelectItem>
-                      <SelectItem value="library">Library</SelectItem>
+                      <SelectItem value="Orthodox Tewahedo">
+                        Orthodox Tewahedo
+                      </SelectItem>
+                      <SelectItem value="Protestant">Protestant</SelectItem>
+                      <SelectItem value="Mosque">Mosque</SelectItem>
+                      <SelectItem value="Library">Library</SelectItem>
                     </SelectContent>
                   </Select>
                 </FormControl>

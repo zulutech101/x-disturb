@@ -2,21 +2,6 @@
 
 import { useState } from "react";
 import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  Legend,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
-import { startOfMonth, startOfWeek, subMonths } from "date-fns";
-
-import {
   Card,
   CardContent,
   CardDescription,
@@ -30,88 +15,132 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+} from "recharts";
 
-// Sample data - replace with your actual data source
-const revenueData = {
-  thisMonth: [
-    { name: "X-Disturb", value: 29500 },
-    { name: "Church", value: 12500 },
-    { name: "Mosque", value: 9800 },
-    { name: "Library", value: 7200 },
-  ],
-  thisWeek: [
-    { name: "X-Disturb", value: 5400 },
-    { name: "Church", value: 3200 },
-    { name: "Mosque", value: 2400 },
-    { name: "Library", value: 1800 },
-  ],
+// Define types
+type Category =
+  | "X-Disturb"
+  | "Orthodox Tewahedo"
+  | "Protestant"
+  | "Mosque"
+  | "Library";
+
+type TimeRange = "thisWeek" | "thisMonth" | "lastMonth";
+
+type RevenueData = Record<TimeRange, Record<Category, number>>;
+
+const revenueData: RevenueData = {
+  thisMonth: {
+    "X-Disturb": 25000,
+    "Orthodox Tewahedo": 6250,
+    Protestant: 6250,
+    Mosque: 6250,
+    Library: 6250,
+  },
+  thisWeek: {
+    "X-Disturb": 10000,
+    "Orthodox Tewahedo": 2500,
+    Protestant: 2500,
+    Mosque: 2500,
+    Library: 2500,
+  },
+  lastMonth: {
+    "X-Disturb": 20000,
+    "Orthodox Tewahedo": 5000,
+    Protestant: 5000,
+    Mosque: 5000,
+    Library: 5000,
+  },
 };
 
+
 const weeklyTrendData = [
-  { name: "Mon", xDisturb: 1090, church: 420, mosque: 380, library: 290 },
-  { name: "Tue", xDisturb: 1190, church: 480, mosque: 400, library: 310 },
-  { name: "Wed", xDisturb: 1310, church: 520, mosque: 450, library: 340 },
-  { name: "Thu", xDisturb: 1230, church: 490, mosque: 420, library: 320 },
-  { name: "Fri", xDisturb: 1390, church: 550, mosque: 480, library: 360 },
-  { name: "Sat", xDisturb: 1480, church: 590, mosque: 510, library: 380 },
-  { name: "Sun", xDisturb: 1510, church: 600, mosque: 520, library: 390 },
+  { name: "Mon", "X-Disturb": 1090, Protestant: 480, Mosque: 380, Library: 290 },
+  { name: "Tue", "X-Disturb": 1190, Protestant: 530, Mosque: 400, Library: 310 },
+  { name: "Wed", "X-Disturb": 1310, Protestant: 550, Mosque: 450, Library: 340 },
+  { name: "Thu", "X-Disturb": 1230, Protestant: 490, Mosque: 420, Library: 320 },
+  { name: "Fri", "X-Disturb": 1390, Protestant: 590, Mosque: 480, Library: 360 },
+  { name: "Sat", "X-Disturb": 1480, Protestant: 610, Mosque: 510, Library: 380 },
+  { name: "Sun", "X-Disturb": 1510, Protestant: 600, Mosque: 520, Library: 390 },
 ];
 
 const monthlyTrendData = [
-  { name: "Week 1", xDisturb: 7100, church: 2800, mosque: 2400, library: 1900 },
-  { name: "Week 2", xDisturb: 7800, church: 3100, mosque: 2600, library: 2100 },
-  { name: "Week 3", xDisturb: 7600, church: 3300, mosque: 2500, library: 1800 },
-  { name: "Week 4", xDisturb: 7000, church: 3300, mosque: 2300, library: 1400 },
+  { name: "Week 1", "X-Disturb": 7100, Protestant: 2800, Mosque: 2400, Library: 1900 },
+  { name: "Week 2", "X-Disturb": 7800, Protestant: 3100, Mosque: 2600, Library: 2100 },
+  { name: "Week 3", "X-Disturb": 7600, Protestant: 3300, Mosque: 2500, Library: 1800 },
+  { name: "Week 4", "X-Disturb": 7000, Protestant: 3300, Mosque: 2300, Library: 1400 },
 ];
 
-const lastMonthlyTrendData = [
-  { name: "Week 2", xDisturb: 7800, church: 3100, mosque: 2600, library: 2100 },
-  { name: "Week 4", xDisturb: 7000, church: 3300, mosque: 2300, library: 1400 },
-  { name: "Week 3", xDisturb: 7600, church: 3300, mosque: 2500, library: 1800 },
-  { name: "Week 1", xDisturb: 7100, church: 2800, mosque: 2400, library: 1900 },
-];
+const COLORS = ["#FF6F68", "#0088FE", "#00C49F", "#FFBB28", "#6366f1"];
 
-const COLORS = ["#FF6F68", "#0088FE", "#00C49F", "#FFBB28"];
+const RevenueCategoryCard = ({
+  title,
+  value,
+  target,
+  color,
+}: {
+  title: string;
+  value: number;
+  target: number;
+  color: string;
+}) => {
+  const percent = Math.min(100, (value / target) * 100);
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>{title}</CardTitle>
+        <CardDescription>This Period</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="text-3xl font-bold">${value.toLocaleString()}</div>
+        <div className="text-sm text-muted-foreground mt-2">
+          {percent.toFixed(0)}% of target revenue
+        </div>
+        <div className="mt-4">
+          <div className="flex items-center justify-between text-sm">
+            <span>Target</span>
+            <span className="font-medium">${target.toLocaleString()}</span>
+          </div>
+          <div className="w-full h-2 bg-gray-100 rounded-full mt-1">
+            <div
+              className="h-full rounded-full"
+              style={{
+                backgroundColor: color,
+                width: `${percent}%`,
+              }}
+            />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
 
 export default function RevenueBreakdown() {
-  const [timeRange, setTimeRange] = useState("thisMonth");
-  const [dateRange, setDateRange] = useState<{
-    from: Date;
-    to: Date;
-  }>({
-    from: startOfMonth(new Date()),
-    to: new Date(),
-  });
+  const [timeRange, setTimeRange] = useState<TimeRange>("thisMonth");
 
-  console.log(dateRange);
-
-  const handleTimeRangeChange = (value: string) => {
-    setTimeRange(value);
-    if (value === "thisMonth") {
-      setDateRange({
-        from: startOfMonth(new Date()),
-        to: new Date(),
-      });
-    } else if (value === "thisWeek") {
-      setDateRange({
-        from: startOfWeek(new Date()),
-        to: new Date(),
-      });
-    } else if (value === "lastMonth") {
-      const lastMonth = subMonths(new Date(), 1);
-      setDateRange({
-        from: startOfMonth(lastMonth),
-        to: new Date(lastMonth.getFullYear(), lastMonth.getMonth() + 1, 0),
-      });
-    }
-  };
+  const pieData = Object.entries(revenueData[timeRange]).map(
+    ([name, value]) => ({ name, value })
+  );
 
   return (
     <div className="container mx-auto my-10 space-y-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="w-full flex items-center justify-between gap-2">
           <h2 className="mb-4 text-xl font-semibold">Revenue Metrics</h2>
-          <Select value={timeRange} onValueChange={handleTimeRangeChange}>
+          <Select value={timeRange} onValueChange={(v) => setTimeRange(v as TimeRange)}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Select time range" />
             </SelectTrigger>
@@ -124,272 +153,115 @@ export default function RevenueBreakdown() {
         </div>
       </div>
 
-      {/* Revenue Metrics Section */}
-      <div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <Card className="col-span-1">
-            <CardHeader>
-              <CardTitle>Total Revenue by Category</CardTitle>
-              <CardDescription>
-                {timeRange === "thisMonth"
-                  ? "This Month"
-                  : timeRange === "thisWeek"
-                  ? "This Week"
-                  : "Selected Period"}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={
-                      timeRange === "thisWeek"
-                        ? revenueData.thisWeek
-                        : revenueData.thisMonth
-                    }
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, percent }) =>
-                      `${name}: ${(percent * 100).toFixed(0)}%`
-                    }
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {revenueData.thisMonth.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={COLORS[index % COLORS.length]}
-                      />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(value) => [`${value}`, "Revenue"]} />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-
-          <Card className="col-span-1 lg:col-span-2">
-            <CardHeader>
-              <CardTitle>Revenue Trend</CardTitle>
-              <CardDescription>
-                {timeRange === "thisMonth"
-                  ? "This Month"
-                  : timeRange === "thisWeek"
-                  ? "This Week"
-                  : "Selected Period"}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={
-                    timeRange === "thisWeek"
-                      ? weeklyTrendData
-                      : timeRange === "thisMonth"
-                      ? monthlyTrendData
-                      : lastMonthlyTrendData
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <Card className="col-span-1">
+          <CardHeader>
+            <CardTitle>Total Revenue by Category</CardTitle>
+            <CardDescription>
+              {timeRange === "thisMonth"
+                ? "This Month"
+                : timeRange === "thisWeek"
+                ? "This Week"
+                : "Last Month"}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={pieData}
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={80}
+                  label={({ name, percent }) =>
+                    `${name}: ${(percent * 100).toFixed(0)}%`
                   }
-                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                  dataKey="value"
                 >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip formatter={(value) => [`$${value}`, "Revenue"]} />
-                  <Legend />
-                  <Bar dataKey="xDisturb" fill="#FF6F68" />
-                  <Bar dataKey="church" fill="#0088FE" />
-                  <Bar dataKey="mosque" fill="#00C49F" />
-                  <Bar dataKey="library" fill="#FFBB28" />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </div>
+                  {pieData.map((_, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={COLORS[index % COLORS.length]}
+                    />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(value) => [`$${value}`, "Revenue"]} />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        <Card className="col-span-1 lg:col-span-2">
+          <CardHeader>
+            <CardTitle>Revenue Trend</CardTitle>
+            <CardDescription>
+              {timeRange === "thisMonth"
+                ? "This Month"
+                : timeRange === "thisWeek"
+                ? "This Week"
+                : "Last Month"}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={timeRange === "thisWeek" ? weeklyTrendData : monthlyTrendData}
+                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="X-Disturb" fill="#FF6F68" />
+                <Bar dataKey="Protestant" fill="#3b82f6" />
+                <Bar dataKey="Mosque" fill="#10b981" />
+                <Bar dataKey="Library" fill="#facc15" />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Category Breakdown */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader>
-            <CardTitle>X-Disturb Revenue</CardTitle>
-            <CardDescription>
-              {timeRange === "thisMonth"
-                ? "This Month"
-                : timeRange === "thisWeek"
-                ? "This Week"
-                : "Selected Period"}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">
-              $
-              {timeRange === "thisWeek"
-                ? revenueData.thisWeek[1].value.toLocaleString()
-                : revenueData.thisMonth[1].value.toLocaleString()}
-            </div>
-            <div className="text-sm text-muted-foreground mt-2">
-              {timeRange === "thisWeek"
-                ? "32% of weekly revenue"
-                : "42% of monthly revenue"}
-            </div>
-            <div className="mt-4">
-              <div className="flex items-center justify-between text-sm">
-                <span>Target</span>
-                <span className="font-medium">37,000</span>
-              </div>
-              <div className="w-full h-2 bg-gray-100 rounded-full mt-1">
-                <div
-                  className="h-full bg-red-400 rounded-full"
-                  style={{
-                    width: `${Math.min(
-                      100,
-                      (timeRange === "thisWeek"
-                        ? revenueData.thisWeek[0].value / 4000
-                        : revenueData.thisMonth[0].value / 15000) * 100
-                    )}%`,
-                  }}
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Church Revenue</CardTitle>
-            <CardDescription>
-              {timeRange === "thisMonth"
-                ? "This Month"
-                : timeRange === "thisWeek"
-                ? "This Week"
-                : "Selected Period"}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">
-              $
-              {timeRange === "thisWeek"
-                ? revenueData.thisWeek[1].value.toLocaleString()
-                : revenueData.thisMonth[1].value.toLocaleString()}
-            </div>
-            <div className="text-sm text-muted-foreground mt-2">
-              {timeRange === "thisWeek"
-                ? "32% of weekly revenue"
-                : "42% of monthly revenue"}
-            </div>
-            <div className="mt-4">
-              <div className="flex items-center justify-between text-sm">
-                <span>Target</span>
-                <span className="font-medium">15,000</span>
-              </div>
-              <div className="w-full h-2 bg-gray-100 rounded-full mt-1">
-                <div
-                  className="h-full bg-blue-500 rounded-full"
-                  style={{
-                    width: `${Math.min(
-                      100,
-                      (timeRange === "thisWeek"
-                        ? revenueData.thisWeek[1].value / 4000
-                        : revenueData.thisMonth[1].value / 15000) * 100
-                    )}%`,
-                  }}
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Mosque Revenue</CardTitle>
-            <CardDescription>
-              {timeRange === "thisMonth"
-                ? "This Month"
-                : timeRange === "thisWeek"
-                ? "This Week"
-                : "Selected Period"}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">
-              $
-              {timeRange === "thisWeek"
-                ? revenueData.thisWeek[2].value.toLocaleString()
-                : revenueData.thisMonth[2].value.toLocaleString()}
-            </div>
-            <div className="text-sm text-muted-foreground mt-2">
-              {timeRange === "thisWeek"
-                ? "24% of weekly revenue"
-                : "33% of monthly revenue"}
-            </div>
-            <div className="mt-4">
-              <div className="flex items-center justify-between text-sm">
-                <span>Target</span>
-                <span className="font-medium">12,000</span>
-              </div>
-              <div className="w-full h-2 bg-gray-100 rounded-full mt-1">
-                <div
-                  className="h-full bg-green-500 rounded-full"
-                  style={{
-                    width: `${Math.min(
-                      100,
-                      (timeRange === "thisWeek"
-                        ? revenueData.thisWeek[2].value / 3000
-                        : revenueData.thisMonth[2].value / 12000) * 100
-                    )}%`,
-                  }}
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Library Revenue</CardTitle>
-            <CardDescription>
-              {timeRange === "thisMonth"
-                ? "This Month"
-                : timeRange === "thisWeek"
-                ? "This Week"
-                : "Selected Period"}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">
-              $
-              {timeRange === "thisWeek"
-                ? revenueData.thisWeek[3].value.toLocaleString()
-                : revenueData.thisMonth[3].value.toLocaleString()}
-            </div>
-            <div className="text-sm text-muted-foreground mt-2">
-              {timeRange === "thisWeek"
-                ? "18% of weekly revenue"
-                : "25% of monthly revenue"}
-            </div>
-            <div className="mt-4">
-              <div className="flex items-center justify-between text-sm">
-                <span>Target</span>
-                <span className="font-medium">10,000</span>
-              </div>
-              <div className="w-full h-2 bg-gray-100 rounded-full mt-1">
-                <div
-                  className="h-full bg-yellow-500 rounded-full"
-                  style={{
-                    width: `${Math.min(
-                      100,
-                      (timeRange === "thisWeek"
-                        ? revenueData.thisWeek[3].value / 2500
-                        : revenueData.thisMonth[3].value / 10000) * 100
-                    )}%`,
-                  }}
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        {([
+          {
+            key: "X-Disturb",
+            target: 50000,
+            color: "#FF6F68",
+          },
+          {
+            key: "Orthodox Tewahedo",
+            target:50000 ,
+            color: "#6366f1",
+          },
+          {
+            key: "Protestant",
+            target:50000 ,
+            color: "#3b82f6",
+          },
+          {
+            key: "Mosque",
+            target: 50000,
+            color: "#10b981",
+          },
+          {
+            key: "Library",
+            target: 50000,
+            color: "#facc15",
+          },
+        ] as { key: Category; target: number; color: string }[]).map(
+          ({ key, target, color }) => (
+            <RevenueCategoryCard
+              key={key}
+              title={key}
+              value={revenueData[timeRange][key]}
+              target={target}
+              color={color}
+            />
+          )
+        )}
       </div>
     </div>
   );
