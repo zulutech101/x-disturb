@@ -3,6 +3,7 @@ export interface SessionData {
   userId?: string;
   token?: string;
   isAuthenticated: boolean;
+  accessToken?: string;
   // Add any other properties you want to store
 }
 

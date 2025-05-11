@@ -5,10 +5,11 @@ import {
   sendNotification,
   fetchNotificationHistory,
   Notification,
+  sendNotficationMobile
 } from "@/app/api/notification-api";
 import { Loader } from "lucide-react";
-
-const categories = ["Orthodox", "Protestant", "Mosque", "Library"];
+import {toast} from 'react-toastify' 
+const categories = ["Orthodox", "Protestant", "Mosque", "Library", 'other'];
 
 const PushNotificationPage = () => {
   const [title, setTitle] = useState("");
@@ -24,7 +25,7 @@ const PushNotificationPage = () => {
   const [isSending, setIsSending] = useState(false);
 
   const handleSend = async () => {
-    if (!title || !message) return alert("Title and Message required");
+    if (!title || !message) return toast.error("Title and Message required");
 
     setIsSending(true); // start loading
 
@@ -33,10 +34,10 @@ const PushNotificationPage = () => {
       if (targetType === "all") {
         target = "all";
       } else if (targetType === "category") {
-        if (!selectedCategory) return alert("Please select a category.");
+        if (!selectedCategory) return toast.error("Please select a category.");
         target = selectedCategory;
       } else if (targetType === "referral") {
-        if (!referralCode) return alert("Please enter a referral code.");
+        if (!referralCode) return toast.error("Please enter a referral code.");
         target = referralCode;
       }
 
@@ -58,6 +59,12 @@ const PushNotificationPage = () => {
       };
 
       await sendNotification(payload);
+      await sendNotficationMobile({
+        message: payload.message,
+        target: payload.target,
+        targetType: payload.targetType,
+        title: payload.title,
+      });
       setTitle("");
       setMessage("");
       setSelectedCategory("");
@@ -67,7 +74,7 @@ const PushNotificationPage = () => {
       setScheduledDateTime("");
       await loadHistory();
     } catch (err) {
-      alert("Something went wrong.");
+      toast.error("Something went wrong.");
       console.error(err);
     } finally {
       setIsSending(false); // stop loading
@@ -76,10 +83,12 @@ const PushNotificationPage = () => {
 
   const loadHistory = async () => {
     const data = await fetchNotificationHistory();
+    console.log(data, 'data')
     setHistory(
       data.sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis())
     );
   };
+
 
   useEffect(() => {
     loadHistory();
@@ -153,7 +162,7 @@ const PushNotificationPage = () => {
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="border p-2 rounded w-full focus:outline-none focus:ring-0"
+              className="border p-2 rounded w-full focus:outline-none focus:ring-0 cursor-pointer"
             >
               <option value="">-- Choose Category --</option>
               {categories.map((cat) => (
@@ -199,13 +208,12 @@ const PushNotificationPage = () => {
         <button
           onClick={handleSend}
           disabled={isSending}
-          className={`px-6 py-2 rounded w-full ${
-            isSending
+          className={`px-6 py-2 rounded w-full flex justify-center items-center ${isSending
               ? "bg-gray-400 cursor-not-allowed"
-              : "bg-orange-600 text-white"
-          }`}
+              : "bg-orange-600 text-white cursor-pointer"
+            }`}
         >
-          {isSending ? <Loader size={16} className="animate-spin"/> : "Send Notification"}
+          {isSending ? <Loader size={16} className="animate-spin" /> : "Send Notification"}
         </button>
       </div>
       {/* History Table */}

@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { updateUserStatus, useFetchUsers } from "@/app/api/user-management-api";
 import UserManagementTable from "@/components/dashboard/user-management-table ";
 import { deleteUser } from "@/app/api/user-management-api";
-
+import {toast} from 'react-toastify'
 // inside component
 
 
@@ -17,7 +17,7 @@ const Page = () => {
   const handleToggleStatus = async (userId: string, currentStatus: boolean) => {
     const result = await updateUserStatus(userId, currentStatus);
     if (!result.success) {
-      alert(result.message);
+      toast.error(result.message);
     }
   };
 
@@ -36,7 +36,7 @@ const Page = () => {
   const handleDelete = async (userId: string) => {
     if (confirm("Are you sure you want to delete this user?")) {
       const result = await deleteUser(userId);
-      if (!result.success) alert(result.message);
+      if (!result.success) toast.error(result.message);
     }
   };
 
