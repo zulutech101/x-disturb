@@ -1,7 +1,17 @@
 "use client";
+
+import {
+  useGetUserGrowthMetricsQuery,
+  useGetRevenueMetricsQuery,
+} from "@/store/metrics/metricsApi";
 import MetricCard from "@/components/dashboard/metric-card";
 import ZoneActivityChart from "@/components/dashboard/report/zone-activity-chart";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+} from "@/components/ui/card";
 import {
   Area,
   XAxis,
@@ -13,35 +23,36 @@ import {
 } from "recharts";
 
 export default function Reports() {
-  const timeData = [
-    { month: "Jan", users: 120 },
-    { month: "Feb", users: 180 },
-    { month: "Mar", users: 140 },
-    { month: "Apr", users: 220 },
-    { month: "May", users: 190 },
-    { month: "Jun", users: 260 },
-    { month: "Jul", users: 230 },
-    { month: "Aug", users: 310 },
-    { month: "Sep", users: 280 },
-    { month: "Oct", users: 350 },
-    { month: "Nov", users: 330 },
-    { month: "Dec", users: 400 },
-  ];
+  const {
+    data: userGrowthData,
+    isLoading: loadingUsers,
+  } = useGetUserGrowthMetricsQuery();
+  const {
+    data: revenueMetricsData,
+    isLoading: loadingRevenue,
+  } = useGetRevenueMetricsQuery();
 
-  const revenueData = [
-    { month: "Jan", revenue: 5200 },
-    { month: "Feb", revenue: 6300 },
-    { month: "Mar", revenue: 4800 },
-    { month: "Apr", revenue: 7000 },
-    { month: "May", revenue: 6600 },
-    { month: "Jun", revenue: 7500 },
-    { month: "Jul", revenue: 7200 },
-    { month: "Aug", revenue: 8300 },
-    { month: "Sep", revenue: 7900 },
-    { month: "Oct", revenue: 9100 },
-    { month: "Nov", revenue: 8700 },
-    { month: "Dec", revenue: 9600 },
-  ];
+  const timeData =
+    userGrowthData?.monthlyGrowth
+      ? Object.entries(userGrowthData.monthlyGrowth).map(
+          ([month, users]) => ({
+            month,
+            users,
+          })
+        )
+      : [];
+
+  const revenueData =
+    revenueMetricsData?.revenueTrend.labels.map((label, index) => {
+      let totalRevenue = 0;
+      revenueMetricsData.revenueTrend.datasets.forEach((dataset) => {
+        totalRevenue += dataset.data[index] ?? 0;
+      });
+      return {
+        month: label,
+        revenue: parseFloat(totalRevenue.toFixed(2)),
+      };
+    }) ?? [];
 
   return (
     <div className="space-y-6 scrollbar-hide">
@@ -58,8 +69,8 @@ export default function Reports() {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <MetricCard
             title="Total User Growths"
-            value="+240"
-            change="+10%"
+            value={userGrowthData?.totalUsers?.toString() ?? "--"}
+            change={`${userGrowthData?.growthRate ?? "0"}%`}
             changeType="positive"
           />
           <MetricCard
@@ -70,91 +81,144 @@ export default function Reports() {
           />
           <MetricCard
             title="Total Payment Revenue"
-            value="25 min"
+            value={`$${revenueMetricsData?.totalRevenueByCategory?.overallTotalRevenue.toFixed(2) ?? "--"}`}
             change="+15%"
             changeType="positive"
           />
         </div>
       </div>
+
+      {/* User Growth Chart */}
       <div>
         <h2 className="mb-4 text-xl font-semibold">User Growth</h2>
-        <Card className="">
+        <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-medium">
               User Growth over time
             </CardTitle>
           </CardHeader>
-          <CardContent className="">
-            <ResponsiveContainer width="100%" height={300}>
-              <AreaChart
-                data={timeData}
-                margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-              >
-                <defs>
-                  <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#FF8736" stopOpacity={0.8} />
-                    <stop offset="95%" stopColor="#FF8736" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <XAxis dataKey="month" />
-                <YAxis />
-                <CartesianGrid strokeDasharray="3 3" />
-                <Tooltip />
-                <Area
-                  type="monotone"
-                  dataKey="users"
-                  stroke="#FF8736"
-                  fillOpacity={1}
-                  fill="url(#colorUsers)"
-                />
-              </AreaChart>
-            </ResponsiveContainer>
+          <CardContent>
+            {loadingUsers ? (
+              <p className="text-sm text-muted-foreground">
+                Loading user growth...
+              </p>
+            ) : timeData.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                No user growth data available.
+              </p>
+            ) : (
+              <ResponsiveContainer width="100%" height={300}>
+                <AreaChart
+                  data={timeData}
+                  margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                >
+                  <defs>
+                    <linearGradient
+                      id="colorUsers"
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
+                      <stop
+                        offset="5%"
+                        stopColor="#FF8736"
+                        stopOpacity={0.8}
+                      />
+                      <stop
+                        offset="95%"
+                        stopColor="#FF8736"
+                        stopOpacity={0}
+                      />
+                    </linearGradient>
+                  </defs>
+                  <XAxis dataKey="month" />
+                  <YAxis />
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <Tooltip />
+                  <Area
+                    type="monotone"
+                    dataKey="users"
+                    stroke="#FF8736"
+                    fillOpacity={1}
+                    fill="url(#colorUsers)"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            )}
           </CardContent>
         </Card>
       </div>
 
+      {/* Zone Activity */}
       <div>
         <h2 className="mb-4 text-xl font-semibold">Zone Activity</h2>
-
         <ZoneActivityChart />
       </div>
 
+      {/* Payment Revenue */}
       <div>
         <h2 className="mb-4 text-xl font-semibold">Payment Revenue Report</h2>
-        <Card className="">
+        <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-medium">
               Payment Revenue over time
             </CardTitle>
           </CardHeader>
-          <CardContent className="">
-            <ResponsiveContainer width="100%" height={300}>
-              <AreaChart
-                data={revenueData}
-                margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-              >
-                <defs>
-                  <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#FF8736" stopOpacity={0.8} />
-                    <stop offset="95%" stopColor="#FF8736" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <XAxis dataKey="month" />
-                <YAxis />
-                <CartesianGrid strokeDasharray="3 3" />
-                <Tooltip />
-                <Area
-                  type="monotone"
-                  dataKey="revenue"
-                  stroke="#FF8736"
-                  fillOpacity={1}
-                  fill="url(#colorUsers)"
-                />
-              </AreaChart>
-            </ResponsiveContainer>
+          <CardContent>
+            {loadingRevenue ? (
+              <p className="text-sm text-muted-foreground">
+                Loading revenue data...
+              </p>
+            ) : revenueData.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                No revenue data available.
+              </p>
+            ) : (
+              <ResponsiveContainer width="100%" height={300}>
+                <AreaChart
+                  data={revenueData}
+                  margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                >
+                  <defs>
+                    <linearGradient
+                      id="colorRevenue"
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
+                      <stop
+                        offset="5%"
+                        stopColor="#FF8736"
+                        stopOpacity={0.8}
+                      />
+                      <stop
+                        offset="95%"
+                        stopColor="#FF8736"
+                        stopOpacity={0}
+                      />
+                    </linearGradient>
+                  </defs>
+                  <XAxis dataKey="month" />
+                  <YAxis />
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <Tooltip />
+                  <Area
+                    type="monotone"
+                    dataKey="revenue"
+                    stroke="#FF8736"
+                    fillOpacity={1}
+                    fill="url(#colorRevenue)"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            )}
           </CardContent>
         </Card>
       </div>
+
+      {/* Export Buttons */}
       <div className="flex justify-end gap-4 mt-6">
         <button
           onClick={() => exportCSV(timeData, "user-growth-report.csv")}
@@ -172,6 +236,7 @@ export default function Reports() {
     </div>
   );
 }
+
 type CSVRow = Record<string, string | number>;
 
 function exportCSV(data: CSVRow[], filename: string) {
