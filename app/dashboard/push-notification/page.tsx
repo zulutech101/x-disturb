@@ -8,7 +8,7 @@ import {
   sendNotficationMobile
 } from "@/app/api/notification-api";
 import { Loader } from "lucide-react";
-
+import {toast} from 'react-toastify' 
 const categories = ["Orthodox", "Protestant", "Mosque", "Library", 'other'];
 
 const PushNotificationPage = () => {
@@ -25,7 +25,7 @@ const PushNotificationPage = () => {
   const [isSending, setIsSending] = useState(false);
 
   const handleSend = async () => {
-    if (!title || !message) return alert("Title and Message required");
+    if (!title || !message) return toast.error("Title and Message required");
 
     setIsSending(true); // start loading
 
@@ -34,10 +34,10 @@ const PushNotificationPage = () => {
       if (targetType === "all") {
         target = "all";
       } else if (targetType === "category") {
-        if (!selectedCategory) return alert("Please select a category.");
+        if (!selectedCategory) return toast.error("Please select a category.");
         target = selectedCategory;
       } else if (targetType === "referral") {
-        if (!referralCode) return alert("Please enter a referral code.");
+        if (!referralCode) return toast.error("Please enter a referral code.");
         target = referralCode;
       }
 
@@ -74,7 +74,7 @@ const PushNotificationPage = () => {
       setScheduledDateTime("");
       await loadHistory();
     } catch (err) {
-      alert("Something went wrong.");
+      toast.error("Something went wrong.");
       console.error(err);
     } finally {
       setIsSending(false); // stop loading
