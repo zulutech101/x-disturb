@@ -1,100 +1,102 @@
 "use client";
 
+import {
+  useGetEntriesOverTimeQuery,
+  useGetEntriesByLocationQuery,
+} from "@/store/entries/entriesApi";
+
 import { Area, Bar, BarChart, XAxis, AreaChart } from "recharts";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
 
-export default function DashboardCharts() {
-  const timeData = [
-    { day: "Mon", entries: 65 },
-    { day: "Tue", entries: 40 },
-    { day: "Wed", entries: 70 },
-    { day: "Thu", entries: 55 },
-    { day: "Fri", entries: 30 },
-    { day: "Sat", entries: 80 },
-    { day: "Sun", entries: 60 },
-  ];
+import { Skeleton } from "@/components/ui/skeleton"; // Optional, or use a <div> with animate-pulse
 
-  const locationData = {
-    addisAbaba: {
-      label: "Addis Ababa",
-      color: "#0066cc",
-    },
-    adama: {
-      label: "Adama",
-      color: "#00a651",
-    },
-    bishoftu: {
-      label: "Bishoftu",
-      color: "#e30613",
-    },
-    bahirDar: {
-      label: "Bahir Dar",
-      color: "#ffd700",
-    },
+export default function DashboardCharts() {
+  const { data: timeApiData, isLoading: timeLoading } =
+    useGetEntriesOverTimeQuery();
+  const { data: regionApiData, isLoading: regionLoading } =
+    useGetEntriesByLocationQuery();
+
+  const timeData =
+    timeApiData?.trendData.map((item) => ({
+      day: new Date(item.date).toLocaleDateString("en-US", {
+        weekday: "short",
+      }),
+      entries: item.count,
+    })) || [];
+
+  const locationColorMap: Record<string, string> = {
+    "Addis Ababa": "#0066cc",
+    Adama: "#00a651",
+    Bishoftu: "#e30613",
+    "Bahir Dar": "#ffd700",
+    "Unknown Region": "#999999",
   };
+
+  const regionData =
+    regionApiData?.regionData.map((item) => ({
+      region: item.region,
+      value: item.count,
+      fill: locationColorMap[item.region] || "#cccccc",
+    })) || [];
 
   return (
     <div className="grid gap-6 md:grid-cols-2">
-      {/* Entries Over Time Card */}
-      <Card className="">
+      {/* Entries Over Time */}
+      <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-base font-medium">
             Entries Over Time
           </CardTitle>
-          <div className="text-2xl font-bold">+12% vs last week</div>
+          <div className="text-2xl font-bold">
+            {timeApiData?.percentageChangeVsLastWeek ?? 0}% vs last week
+          </div>
         </CardHeader>
-        <CardContent className="">
-          <ChartContainer
-            config={{
-              entries: {
-                label: "Entries",
-                color: "#ff6b4a",
-              },
-            }}
-            className="h-[200px] w-full"
-          >
-            <AreaChart
-              accessibilityLayer
-              data={timeData}
-              margin={{
-                top: 10,
-                left: 12,
-                right: 12,
-              }}
+        <CardContent>
+          {timeLoading ? (
+            <Skeleton className="h-[200px] w-full rounded-md" />
+          ) : timeData.length === 0 ? (
+            <div className="text-muted-foreground text-sm h-[200px] flex items-center justify-center">
+              No data for this week.
+            </div>
+          ) : (
+            <ChartContainer
+              config={{ entries: { label: "Entries", color: "#ff6b4a" } }}
+              className="h-[200px] w-full"
             >
-              <XAxis
-                dataKey="day"
-                tickLine={false}
-                axisLine={false}
-                tickMargin={8}
-                tickFormatter={(value) => value.slice(0, 3)}
-              />
-              <ChartTooltip
-                cursor={false}
-                content={<ChartTooltipContent indicator="line" />}
-              />
-              <defs>
-                <linearGradient id="fillGraph" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#FF8736" stopOpacity={0.8} />
-                  <stop offset="95%" stopColor="#FF8736" stopOpacity={0.1} />
-                </linearGradient>
-              </defs>
-              <Area
-                dataKey="entries"
-                type="natural"
-                fill="url(#fillGraph)"
-                fillOpacity={0.4}
-                stroke="#FF8736"
-                strokeWidth={2}
-                dot={(props) => {
-                  const { cx, cy } = props;
-                  return (
+              <AreaChart
+                data={timeData}
+                margin={{ top: 10, left: 12, right: 12 }}
+              >
+                <XAxis
+                  dataKey="day"
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                />
+                <ChartTooltip
+                  cursor={false}
+                  content={<ChartTooltipContent indicator="line" />}
+                />
+                <defs>
+                  <linearGradient id="fillGraph" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#FF8736" stopOpacity={0.8} />
+                    <stop offset="95%" stopColor="#FF8736" stopOpacity={0.1} />
+                  </linearGradient>
+                </defs>
+                <Area
+                  dataKey="entries"
+                  type="natural"
+                  fill="url(#fillGraph)"
+                  stroke="#FF8736"
+                  strokeWidth={2}
+                  dot={({ cx, cy }) => (
                     <circle
                       cx={cx}
                       cy={cy}
@@ -103,21 +105,21 @@ export default function DashboardCharts() {
                       stroke="white"
                       strokeWidth={2}
                     />
-                  );
-                }}
-                activeDot={{
-                  r: 6,
-                  fill: "#4ade80",
-                  stroke: "white",
-                  strokeWidth: 2,
-                }}
-              />
-            </AreaChart>
-          </ChartContainer>
+                  )}
+                  activeDot={{
+                    r: 6,
+                    fill: "#4ade80",
+                    stroke: "white",
+                    strokeWidth: 2,
+                  }}
+                />
+              </AreaChart>
+            </ChartContainer>
+          )}
         </CardContent>
       </Card>
 
-      {/* Entries by Location Card */}
+      {/* Entries by Location */}
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-base font-medium">
@@ -126,42 +128,43 @@ export default function DashboardCharts() {
           <div className="text-2xl font-bold">By region</div>
         </CardHeader>
         <CardContent>
-          <ChartContainer config={locationData} className="h-[200px] w-full">
-            <BarChart
-              data={[
-                {
-                  region: "Addis Ababa",
-                  value: 100,
-                  fill: "var(--color-addisAbaba)",
-                },
-                {
-                  region: "Adama",
-                  value: 100,
-                  fill: "var(--color-adama)",
-                },
-                {
-                  region: "Bishoftu",
-                  value: 100,
-                  fill: "var(--color-bishoftu)",
-                },
-                {
-                  region: "Bahir Dar",
-                  value: 100,
-                  fill: "var(--color-bahirDar)",
-                },
-              ]}
-              margin={{ top: 5, right: 10, left: 0, bottom: 30 }}
-            >
-              <XAxis
-                dataKey="region"
-                axisLine={false}
-                tickLine={false}
-                dy={10}
-              />
-              <Bar dataKey="value" radius={[4, 4, 0, 0]} fill="currentColor" />
-              <ChartTooltip content={<ChartTooltipContent />} cursor={false} />
-            </BarChart>
-          </ChartContainer>
+          {regionLoading ? (
+            <Skeleton className="h-[200px] w-full rounded-md" />
+          ) : regionData.length === 0 ? (
+            <div className="text-muted-foreground text-sm h-[200px] flex items-center justify-center">
+              No location data available.
+            </div>
+          ) : (
+            <ChartContainer config={{}} className="h-[200px] w-full">
+              <BarChart
+                data={regionData}
+                margin={{ top: 5, right: 10, left: 0, bottom: 30 }}
+              >
+                <XAxis
+                  dataKey="region"
+                  axisLine={false}
+                  tickLine={false}
+                  dy={10}
+                />
+                {regionData.map((entry, index) => (
+                  <Bar
+                    key={index}
+                    dataKey="value"
+                    data={[entry]}
+                    radius={[4, 4, 0, 0]}
+                    fill={entry.fill}
+                    barSize={40}
+                    xAxisId={index.toString()}
+                  />
+                ))}
+
+                <ChartTooltip
+                  content={<ChartTooltipContent />}
+                  cursor={false}
+                />
+              </BarChart>
+            </ChartContainer>
+          )}
         </CardContent>
       </Card>
     </div>

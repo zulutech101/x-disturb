@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { store } from "@/lib/store"
+import { store } from "@/store/store"
 import { Provider } from "react-redux"
 
 export function ReduxProvider({ children }: { children: React.ReactNode }) {
