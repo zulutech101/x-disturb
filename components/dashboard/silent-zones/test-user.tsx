@@ -9,6 +9,7 @@ import {
   updateDoc 
 } from "firebase/firestore";
 import { db } from "@/app/firebase/config";
+import { toast } from "react-toastify";
 
 // User interface (adjust fields based on your needs)
 interface User {
@@ -79,7 +80,7 @@ export default function UsersTable() {
   const handleToggleStatus = async (userId: string, currentStatus: boolean) => {
     const result = await updateUserStatus(userId, currentStatus);
     if (!result.success) {
-      alert(result.message); // Handle error as needed
+      toast.error(result.message); // Handle error as needed
     }
   };
 

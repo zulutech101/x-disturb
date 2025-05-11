@@ -45,10 +45,11 @@ export default function LoginPage() {
         formData.email,
         formData.password
       );
-
+      
       if (res) {
         session.setItem("isAuthenticated", true);
         session.setItem("userId", res.user.uid);
+        session.setItem("accessToken", await res.user.getIdToken());
       }
       console.log({ res });
       router.push("/dashboard");
